@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="翻译,Elm," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>Elm 入门指南 - 安装 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        Elm 入门指南 - 安装
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-04-10T16:00:00.000Z">
+        2018-04-11
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Elm/">Elm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/翻译/">翻译</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 6 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <p>Elm 语言入门系列。<br><a id="more"></a></p>
+<blockquote>
+<p><strong>注:</strong> 如果你不想安装，可以使用<a href="http://elm-lang.org/try" target="_blank" rel="noopener">在线编辑器</a> 以及 <a href="http://elmrepl.cuberoot.in/" target="_blank" rel="noopener">在线 REPL</a>。</p>
+</blockquote>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><ul>
+<li>Mac &mdash; <a href="https://44a95588fe4cc47efd96-ec3c2a753a12d2be9f23ba16873acc23.ssl.cf2.rackcdn.com/Elm-Platform-0.18.pkg" target="_blank" rel="noopener">安装</a></li>
+<li>Windows &mdash; <a href="https://44a95588fe4cc47efd96-ec3c2a753a12d2be9f23ba16873acc23.ssl.cf2.rackcdn.com/Elm-Platform-0.18.exe" target="_blank" rel="noopener">安装</a></li>
+<li>Anywhere &mdash; <a href="https://www.npmjs.com/package/elm" target="_blank" rel="noopener">npm 安装</a> or <a href="https://github.com/elm-lang/elm-platform" target="_blank" rel="noopener">源码安装</a></li>
+</ul>
+<p>安装完毕后，下面的命令行工具可以使用:</p>
+<ul>
+<li><a href="#elm-repl"><code>elm-repl</code></a> &mdash; Elm REPL</li>
+<li><a href="#elm-reactor"><code>elm-reactor</code></a> &mdash; 提高项目开发速度（原文:get a project going quickly）</li>
+<li><a href="#elm-make"><code>elm-make</code></a> &mdash; 编译某个目录下的 Elm 代码</li>
+<li><a href="#elm-package"><code>elm-package</code></a> &mdash; 下载 package</li>
+</ul>
+<p>在配置好编辑器后，我们再详细描述他们是怎么协同共工作的。</p>
+<blockquote>
+<p><strong>Troubleshooting:</strong> 提高学习速度最快的方式是参与到 Elm 社区和他们交流。我们愿意沟通和提供帮助！如果你遇到什么问题，欢迎来 <a href="http://elmlang.herokuapp.com/" target="_blank" rel="noopener">Elm Slack</a> 提问。事实上，这样节省你自己的时间。不要犹豫！</p>
+</blockquote>
+<h2 id="配置编辑器"><a href="#配置编辑器" class="headerlink" title="配置编辑器"></a>配置编辑器</h2><p>好的编辑器可以在你学习 Elm 过程中助你一臂之力。下面的编辑器中都有 Elm  的插件:</p>
+<ul>
+<li><a href="https://atom.io/packages/language-elm" target="_blank" rel="noopener">Atom</a></li>
+<li><a href="https://github.com/lepinay/elm-brackets" target="_blank" rel="noopener">Brackets</a></li>
+<li><a href="https://github.com/jcollard/elm-mode" target="_blank" rel="noopener">Emacs</a></li>
+<li><a href="https://github.com/durkiewicz/elm-plugin" target="_blank" rel="noopener">IntelliJ</a></li>
+<li><a href="https://github.com/rundis/elm-light" target="_blank" rel="noopener">Light Table</a></li>
+<li><a href="https://packagecontrol.io/packages/Elm%20Language%20Support" target="_blank" rel="noopener">Sublime Text</a></li>
+<li><a href="https://github.com/ElmCast/elm-vim" target="_blank" rel="noopener">Vim</a></li>
+<li><a href="https://github.com/sbrink/vscode-elm" target="_blank" rel="noopener">VS Code</a></li>
+</ul>
+<p>如果上面的编辑器你都不喜欢，那么 <a href="https://www.sublimetext.com/" target="_blank" rel="noopener">Sublime Text</a>  是个不错的选择！</p>
+<p>你可以试试 <a href="https://github.com/avh4/elm-format" target="_blank" rel="noopener">elm-format</a>，帮助你格式化代码。</p>
+<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>安装完 Elm 后你或许好奇 <code>elm-repl</code>, <code>elm-reactor</code>, <code>elm-make</code>, 和 <code>elm-package</code> 命令具体都是做什么的?</p>
+<h3 id="elm-repl"><a href="#elm-repl" class="headerlink" title="elm-repl"></a>elm-repl</h3><p><a href="https://github.com/elm-lang/elm-repl" target="_blank" rel="noopener"><code>elm-repl</code></a> 让你做表达式求值(译者注： Read, Evaluate, Print, Loop)。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ elm-repl</span><br><span class="line">---- elm-repl 0.18.0 -----------------------------------------------------------</span><br><span class="line"> :<span class="built_in">help</span> <span class="keyword">for</span> <span class="built_in">help</span>, :<span class="built_in">exit</span> to <span class="built_in">exit</span>, more at &lt;https://github.com/elm-lang/elm-repl&gt;</span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">&gt; 1 / 2</span><br><span class="line">0.5 : Float</span><br><span class="line">&gt; List.length [1,2,3,4]</span><br><span class="line">4 : Int</span><br><span class="line">&gt; String.reverse <span class="string">"stressed"</span></span><br><span class="line"><span class="string">"desserts"</span> : String</span><br><span class="line">&gt; :<span class="built_in">exit</span></span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+<p>我们将在 &ldquo;语言核心概念&rdquo; 章节使用 <code>elm-repl</code>，更多细节请阅读<a href="https://github.com/elm-lang/elm-repl/blob/master/README.md" target="_blank" rel="noopener">这里</a>。</p>
+<blockquote>
+<p><strong>注:</strong> <code>elm-repl</code> 将代码编译成 JavaScript 后执行, 确保你安装了 <a href="http://nodejs.org/" target="_blank" rel="noopener">Node.js</a> 。</p>
+</blockquote>
+<h3 id="elm-reactor"><a href="#elm-reactor" class="headerlink" title="elm-reactor"></a>elm-reactor</h3><p><a href="https://github.com/elm-lang/elm-reactor" target="_blank" rel="noopener"><code>elm-reactor</code></a> helps you build Elm projects without<br>messing with the command-line too much. You just run it at the root of your project, like this:</p>
+<p><a href="https://github.com/elm-lang/elm-reactor" target="_blank" rel="noopener"><code>elm-reactor</code></a> 帮你一句命令搞定整个工程。你只需要在项目的根目录下指定如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/evancz/elm-architecture-tutorial.git</span><br><span class="line"><span class="built_in">cd</span> elm-architecture-tutorial</span><br><span class="line">elm-reactor</span><br></pre></td></tr></table></figure>
+<p>这句命令在 <a href="http://localhost:8000" target="_blank" rel="noopener"><code>http://localhost:8000</code></a> 启动了一个服务。你可以浏览任何一个 Elm 文件，例如 <code>examples/01-button.elm</code>。</p>
+<p><strong>值得注意的 flags:</strong></p>
+<ul>
+<li><code>--port</code> 指定端口号. 比如<br><code>elm-reactor --port=8123</code> 指定服务运行在 <code>http://localhost:8123</code>。</li>
+<li><code>--address</code> 可以替换默认的 <code>localhost</code> 成其他的地址. 比如使用 <code>elm-reactor --address=0.0.0.0</code> 让你的服务监听局域网所有的请求。</li>
+</ul>
+<h2 id="elm-make"><a href="#elm-make" class="headerlink" title="elm-make"></a>elm-make</h2><p><a href="https://github.com/elm-lang/elm-make" target="_blank" rel="noopener"><code>elm-make</code></a> 用来编译 Elm  工程成 HTML 或者 JavaScript。这是最常用的编译 Elm 代码的方式，如果你的代码无需用<code>elm-reactor</code>调试，可以直接运行 <code>elm-make</code> 来构建。</p>
+<p>假设你要编译 <code>Main.elm</code> 成 HTML 文件 <code>main.html</code>，你需要执行：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">elm-make Main.elm --output=main.html</span><br></pre></td></tr></table></figure></p>
+<p><strong>值得注意的 flags:</strong></p>
+<ul>
+<li><code>--warn</code> 打印警告语句以提高代码质量</li>
+</ul>
+<h3 id="elm-package"><a href="#elm-package" class="headerlink" title="elm-package"></a>elm-package</h3><p><a href="https://github.com/elm-lang/elm-package" target="_blank" rel="noopener"><code>elm-package</code></a> 用来下载和发布到<a href="http://package.elm-lang.org/" target="_blank" rel="noopener">package catalog</a>。作为社区成员解决问题<a href="http://package.elm-lang.org/help/design-guidelines" target="_blank" rel="noopener">更好的办法</a>，代码分享出来让大家使用才是王道！</p>
+<p>假设你需要使用 <a href="http://package.elm-lang.org/packages/elm-lang/http/latest" target="_blank" rel="noopener"><code>elm-lang/http</code></a> 和 <a href="http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest" target="_blank" rel="noopener"><code>NoRedInk/elm-decode-pipeline</code></a> 来做网络请求，并且将返回的结果转换成 JSON，你可以这样做：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">elm-package install elm-lang/http</span><br><span class="line">elm-package install NoRedInk/elm-decode-pipeline</span><br></pre></td></tr></table></figure>
+<p>这句命令把依赖安装到 <code>elm-package.json</code> 文件。（<code>elm-package.json</code> 文件描述项目，如果没有的话，可以手动创建）,更多姿势请移步 <a href="https://github.com/elm-lang/elm-package" target="_blank" rel="noopener">这里</a>!</p>
+<p><strong>值得关注的命令:</strong></p>
+<ul>
+<li><code>install</code>: 安装依赖到项目，并修改描述文件 <code>elm-package.json</code></li>
+<li><code>publish</code>: 发布你的 Elm Package</li>
+<li><code>bump</code>: 根据 API 改变来解决版本号之间的冲突</li>
+<li><code>diff</code>: 查看两个 API 之间的区别</li>
+</ul>
+<blockquote>
+<p>本文系<a href="https://github.com/evancz/guide.elm-lang.org" target="_blank" rel="noopener">原文</a>翻译。中文 <a href="https://github.com/KevinOfNeu/guide.elm-lang.org" target="_blank" rel="noopener">Repo</a>, Gitbook <a href="https://legacy.gitbook.com/book/kevinofneu/elm/details" target="_blank" rel="noopener">地址</a>。</p>
+</blockquote>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#配置编辑器"><span class="toc-text">配置编辑器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令行工具"><span class="toc-text">命令行工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#elm-repl"><span class="toc-text">elm-repl</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#elm-reactor"><span class="toc-text">elm-reactor</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#elm-make"><span class="toc-text">elm-make</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#elm-package"><span class="toc-text">elm-package</span></a></li></ol></li></ol></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/04/09/Elm-guide/" rel="next" title="Elm 入门指南 - 介绍">
+          Elm 入门指南 - 介绍
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/05/01/Creating-JVM-Language-Part-3/" rel="prev" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 3">
+            手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 3
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/04/11/Elm-guide-01/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>
