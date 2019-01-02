@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.0xff000000.com/"/>
-  <updated>2018-12-30T12:35:10.513Z</updated>
+  <updated>2019-01-02T15:27:56.936Z</updated>
   <id>https://blog.0xff000000.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>100 天阅读计划，深入剖析程序和计算机 - 图灵机</title>
+    <link href="https://blog.0xff000000.com/2019/01/02/readling-plan-01-06/"/>
+    <id>https://blog.0xff000000.com/2019/01/02/readling-plan-01-06/</id>
+    <published>2019-01-02T15:11:00.000Z</published>
+    <updated>2019-01-02T15:27:56.936Z</updated>
+    
+    <content type="html"><![CDATA[<p>有限自动机和下推自动机——都有很严格的限制，这些限制影响了它们作为现实计算模型的使用。我们的小型系统还要多强大，才能摆脱这些限制并完成正常计算机的所有工作呢？它还要多复杂才能对 RAM 或硬盘的行为以及合适的输出机制建模呢？怎么才能设计一台能实际运行程序而不总是执行某个硬编码任务的机器呢？</p><a id="more"></a><p>20 世纪 30 年代，阿兰·图灵（Alan Turing）致力于从本质上解决这个问题。在那个年代，单词 computer 意味着一个人，通常是一个女人，她手工重复着一系列繁重的数学性操作以执行长长的计算。图灵当时正在寻找一种理解和描述“人肉计算机”操作特征的方法，这样同样的工作就可以完全由机器执行。本章，我们将看到图灵关于设计最简单的“自动化机器”的思想，这一机器具有手工计算的全部能力和复杂性。</p><h2 id="确定型图灵机"><a href="#确定型图灵机" class="headerlink" title="确定型图灵机"></a>确定型图灵机</h2><p>我们通过给一台有限自动机赋予一个作为外部存储的栈，增强了它的计算能力。与由机器状态提供的有限内部存储相比，栈的真正优点是能动态增长以适应任意数量的信息，从而使下推自动机能够处理那些需要存储任意数量数据的问题。</p><p>但是，外部存储这种特殊的形式给如何使用存储之后的数据带来了限制。通过把栈替换成更灵活的存储机制，我们可以消除这些限制并进一步提高能力。</p><h3 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h3><blockquote><p>计算通常可以通过在纸上写某些符号完成。我们可以把这张纸想象成小朋友的算术本，它被划分成了一个个方格。在初等算术里，我们有时也会使用纸的二维特性。但这种使用通常是可以避免的，并且我认为纸的二维性不是计算的本质，而且相信大家也赞同我这一观点。我假定计算是在一张一维的纸上完成的，比如在一条分成方格的纸带上完成。 ——阿兰•图灵， 《论可计算数及其在判定性问题上的应用》</p></blockquote><p>图灵的做法是给一台机器配上一条无限长的空纸带（实际上是一个两端都能随需增长的一维数组） ，并且允许在纸带上的任意位置读写字符。一条纸带既做存储又做输入：可以在纸带上预先填满字符串当作输入，然后机器在执行过程中可以读取这些字符并在必要的时候覆盖它们。</p><p>能访问一条无限长纸带的有限状态自动机叫作图灵机（Turing Machine，TM ） 。这个名字通常指一条拥有确定性规则的机器，但我们也可以毫无歧义地叫它确定型图灵机（Deterministic Turing Machine，DTM） 。</p><p>传统的图灵机使用简单的安排：用一个纸带头（tape head）指向纸带的一个特定位置，并且只能在那个位置读取或写入字符。每一步计算之后，纸带头都可以向左或者向右移动一个方格，这意味着一台图灵机为了到达远处的位置只能费力地在纸带上往复移动。使用移动缓慢的纸带头不会影响机器访问纸带上任何数据的能力，只会影响花费的时间，因此为了保持简单付出这个代价是值得的。</p><p>能访问纸带之后，除了能够接受或者拒绝字符串，我们又能解决新的问题了。例如，我们可以设计一台在纸带上就地递增一个二进制数的 DTM。为此，我们需要知道如何递增一个二进制数的一位数字。幸好这很简单：如果这位的数字是 0，就用 1 替换；如果这位数是 1，就用 0 替换，然后立即使用同样的方法增加它左边的数字（ “进 1 位” ） 。图灵机只需要使用这个过程递增二进制数的最右位，然后把纸带头移到起始位置。</p><ul><li>给机器赋予三个状态（状态 1、状态 2、状态 3） ，状态 3 作为接受状态</li><li>机器从状态 1 开始，纸带头指向一个二进制数的最右位</li><li>处于状态 1 并且读到一个 0（或者空白）时，就用 1 覆写，把纸带头向右移，然后回到 状态 2</li><li>处于状态 1 并且读到一个 1 时，就用 0 覆写，然后把纸带头向左移</li><li>处于状态 2 并且读到一个 0 或者 1 时，就把纸带头向右移</li><li>处于状态 2 并且读到空白时，就把纸带头向左移并转移到状态 3</li></ul><p>在机器试图递增一位数字的时候，它处于状态 1，在移回起始位置时处于状态 2，结束的时候处于状态 3。下面是初始纸带上字符串为 ‘1011’ 时对机器执行的跟踪。纸带头当前指向的字符会由括号包围，而下划线表示输入字符串某一端的空白方格。</p><p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-01-02-151512.png" alt=""></p><h3 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h3><blockquote><p>让我们想象一下，由机器执行的操作被分解成“简单的操作” ，这些操作都非常基本，以至于无法想象它们能进一步分解。……操作实际上是由计算者的思维状态和被观察的符号决定的……具体来讲，操作执行之后，计算者的思维状态就确定了。<br>我们现在可以构造一台做这种计算者工作的机器了。  ——阿兰•图灵， 《论可计算数及其在判定性问题上的应用》</p></blockquote><p>在每一步计算中，可能都有几个“简单的操作”需要图灵机执行：在纸带头的当前位置读取字符，在那个位置写入一个新字符，把纸带头左移或者右移，或者改变状态。简单起见，我们没有为所有这些动作指定不同种类的规则，而只是像处理下推自动机时那样，只设计了一种能灵活适应各种条件的规则格式。</p><p>这个统一的规则格式有 5 部分：</p><ul><li>机器的当前状态</li><li>必须出现在纸带头当前位置的字符</li><li>机器的下一状态</li><li>要写入纸带头当前位置的字符</li><li>写入纸带之后纸带头的移动方向（向左还是向右）</li></ul><p>这里我们假设一台图灵机每次执行规则，都要改变状态并向纸带写一个字符。就像通常对状态机的处理那样，如果我们想要一个规则不实际改变状态，可以让“下一个状态”与当前状态相同；与之类似的是，如果想要一个规则不改变纸带内容，可以把与读到的字符一样的字符写入纸带。</p><h2 id="非确定性图灵机"><a href="#非确定性图灵机" class="headerlink" title="非确定性图灵机"></a>非确定性图灵机</h2><p>我们看到非确定性没有让有限自动机有什么不同。增加不确定性不会使一台图灵机更加强大。因为 DFA 和 DTM 都有足够的能力模拟其非确定性的对应机器。</p><h2 id="最大能力"><a href="#最大能力" class="headerlink" title="最大能力"></a>最大能力</h2><p>确定型图灵机代表了从有限计算机器到全能机器的临界点。实际上，通过升级图灵机规范以使其更强大的任何尝试都注定失败，因为它们本来就有能力模拟任何潜在的增强了。尽管增加某些特性会使图灵机更小巧或者更高效，但无法从根本上增强它们的能力。</p><p>例如对传统图灵机的 4 个其他扩展——内部存储、子例程、多纸带以及多维纸带，没有任何一个可以增加计算能力。</p><h2 id="通用机器"><a href="#通用机器" class="headerlink" title="通用机器"></a>通用机器</h2><p>尽管到目前为止我们看到的机器都有严重的缺陷：它们的规则都是硬编码的，这让它们无法适应不同的任务。一台能接受与一个特定正则表达式匹配的字符串的 DFA，不可能学会接受一个不同集合的字符串；一台能识别回文的 NPDA 将只能识别回文；一台递增二进制数的图灵机将永远不能做其他用途。</p><p>大多数现实中的计算机不是这么工作的。现代计算机不是专门做某一项特殊工作的，而是为了通用目的而设计的并且能通过编程执行不同的任务。尽管一台可编程计算机的指令集和 CPU 设计是固定的，但能通过软件控制它的硬件并根据用户需要改变它的行为。</p><p>我们的简单机器能做这样的事情吗？在做一件不同的工作时，不必每次去设计一台新的机器，而是设计一台简单机器，它会从输入读取一个程序，然后做这个程序定义的任何工作。这办得到吗？</p><p>或许不足为奇的是，一台图灵机足够强大，它能从纸带读取一台简单机器的描述——比如说，一台确定性有限自动机——然后运行这台机器的模拟以找出它的工作内容。</p><p>一台完整的图灵机以字符串的形式写在另一台图灵机的纸带上，准备通过模拟开始自己的生命周期。</p><p>它的规则手册、接受状态以及起始配置——都以编码的格式存在于UTM 的纸带上。为了执行模拟的一步，UTM 要在规则、当前状态和所模拟机器的纸带之间来回移动纸带头，以搜索出能应用到当前配置的一条规则。它找到一条规则的时候，就会根据规则里定义的字符和方向，更新所模拟的纸带，并把所模拟的机器放到新的状态上去。</p><p>这个过程会一直重复，直到所模拟的机器进入到一个接受状态，或者到达某个配置后因为没有规则应用处于卡死的状态。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;有限自动机和下推自动机——都有很严格的限制，这些限制影响了它们作为现实计算模型的使用。我们的小型系统还要多强大，才能摆脱这些限制并完成正常计算机的所有工作呢？它还要多复杂才能对 RAM 或硬盘的行为以及合适的输出机制建模呢？怎么才能设计一台能实际运行程序而不总是执行某个硬编码任务的机器呢？&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
+    
+      <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
+    
+      <category term="NFA" scheme="https://blog.0xff000000.com/tags/NFA/"/>
+    
+  </entry>
   
   <entry>
     <title>100 天阅读计划，深入剖析程序和计算机 - 增加计算能力</title>
@@ -210,9 +236,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -236,9 +262,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -262,9 +288,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -288,9 +314,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -314,9 +340,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -340,9 +366,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -366,9 +392,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -392,9 +418,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -418,9 +444,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -444,9 +470,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -470,9 +496,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
+    
+      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -496,35 +522,9 @@
     </summary>
     
     
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
-      <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 8</title>
-    <link href="https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-8/"/>
-    <id>https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-8/</id>
-    <published>2018-08-24T03:00:00.000Z</published>
-    <updated>2018-08-24T03:22:39.703Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 8 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p></blockquote><a id="more"></a><h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-8" target="_blank" rel="noopener">Github</a></p><h2 id="1-语法改动"><a href="#1-语法改动" class="headerlink" title="1. 语法改动"></a>1. 语法改动</h2><p>基本的算数操作包括：</p><ul><li>+</li><li>-</li><li>*</li><li>/</li></ul><p>本节需要改动的语法规则仅是 “expression”。<br>表达式通俗来讲就是求值（方法调用，值，变量引用等）。<br>而语句会做一些操作，但不一定会产生值，例如 if 语句。<br>既然算数操作总是返回值，那么他就是表达式：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">expression : varReference #VARREFERENCE</span><br><span class="line">           | value        #VALUE</span><br><span class="line">           | functionCall #FUNCALL</span><br><span class="line">           |  &apos;(&apos;expression &apos;*&apos; expression&apos;)&apos; #MULTIPLY</span><br><span class="line">           | expression &apos;*&apos; expression  #MULTIPLY</span><br><span class="line">           | &apos;(&apos; expression &apos;/&apos; expression &apos;)&apos; #DIVIDE</span><br><span class="line">           | expression &apos;/&apos; expression #DIVIDE</span><br><span class="line">           | &apos;(&apos; expression &apos;+&apos; expression &apos;)&apos; #ADD</span><br><span class="line">           | expression &apos;+&apos; expression #ADD</span><br><span class="line">           | &apos;(&apos; expression &apos;-&apos; expression &apos;)&apos; #SUBSTRACT</span><br><span class="line">           | expression &apos;-&apos; expression #SUBSTRACT</span><br><span class="line">           ;</span><br></pre></td></tr></table></figure><p>说明：</p><ul><li><code>#</code> 标号表示为当前规则创建可选的回调。Antlr 会在 <code>ENkelVisotor</code> 中生成诸如 <code>visitDIVIDE(), visitADD()</code> 的接口。</li><li>规则的定义先后顺序至关重要。假设我们有如下表达式： <code>1 +*3</code>。这样会产生歧义，因为有很多解释：<code>1+2=3 3*3=9</code> 或者 <code>2*3=6 6+1=7</code>。Antlr 通过选择第一个符合的规则来解决歧义。因此，规则定义的顺序会影响到算数表达式的执行顺序。</li><li><code>()</code> 里的表达式优先级高于普通优先级。因此诸如 <code>(1+2)*3</code> 的表达式能被正确解析和执行。</li></ul><h2 id="2-匹配-Antlr-上下文对象"><a href="#2-匹配-Antlr-上下文对象" class="headerlink" title="2. 匹配 Antlr 上下文对象"></a>2. 匹配 Antlr 上下文对象</h2><p>Antlr 为每一条规则生成新的类和回调。为每个操作新建一个类是个不错的选择，这样会让字节码的生成看起来更加干净：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public class ExpressionVisitor extends EnkelBaseVisitor&lt;Expression&gt; &#123;</span><br><span class="line"></span><br><span class="line">    //some other methods (visitFunctionCall, visitVaraibleReference etc)</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public Expression visitADD(@NotNull EnkelParser.ADDContext ctx) &#123;</span><br><span class="line">        EnkelParser.ExpressionContext leftExpression = ctx.expression(0);</span><br><span class="line">        EnkelParser.ExpressionContext rightExpression = ctx.expression(1);</span><br><span class="line"></span><br><span class="line">        Expression leftExpress = leftExpression.accept(this);</span><br><span class="line">        Expression rightExpress = rightExpression.accept(this);</span><br><span class="line"></span><br><span class="line">        return new Addition(leftExpress, rightExpress);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Expression visitMULTIPLY(@NotNull EnkelParser.MULTIPLYContext ctx) &#123;</span><br><span class="line">        EnkelParser.ExpressionContext leftExpression = ctx.expression(0);</span><br><span class="line">        EnkelParser.ExpressionContext rightExpression = ctx.expression(1);</span><br><span class="line"></span><br><span class="line">        Expression leftExpress = leftExpression.accept(this);</span><br><span class="line">        Expression rightExpress = rightExpression.accept(this);</span><br><span class="line"></span><br><span class="line">        return new Multiplication(leftExpress, rightExpress);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    //Division</span><br><span class="line">    </span><br><span class="line">    //Substration</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>Multiplcation,Addition,Division 和 Substraction 都是不可变的 POJO，存储了操作符的左侧和右侧的表达式（1+2，其中1 是左侧,2 是右侧）。</p><h2 id="3-生成字节码"><a href="#3-生成字节码" class="headerlink" title="3. 生成字节码"></a>3. 生成字节码</h2><p>当 Enkel 代码被解析和匹配到表达式对象后，我们可以进行下一步，字节码生成了。这里我们还需要创建另一个类，类方法中的参数是表达式的类型，方法体内生成对应的字节码。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public class ExpressionGenrator &#123;</span><br><span class="line"></span><br><span class="line">    //other methods (generateFunctionCall, generateVariableReference etc.)</span><br><span class="line"></span><br><span class="line">    public void generate(Addition expression) &#123;</span><br><span class="line">        evaluateArthimeticComponents(expression);</span><br><span class="line">        methodVisitor.visitInsn(Opcodes.IADD);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void generate(Substraction expression) &#123;</span><br><span class="line">        evaluateArthimeticComponents(expression);</span><br><span class="line">        methodVisitor.visitInsn(Opcodes.ISUB);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void generate(Multiplication expression) &#123;</span><br><span class="line">        evaluateArthimeticComponents(expression);</span><br><span class="line">        methodVisitor.visitInsn(Opcodes.IMUL);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void generate(Division expression) &#123;</span><br><span class="line">        evaluateArthimeticComponents(expression);</span><br><span class="line">        methodVisitor.visitInsn(Opcodes.IDIV);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    private void evaluateArthimeticComponents(ArthimeticExpression expression) &#123;</span><br><span class="line">            Expression leftExpression = expression.getLeftExpression();</span><br><span class="line">            Expression rightExpression = expression.getRightExpression();</span><br><span class="line">            leftExpression.accept(this);</span><br><span class="line">            rightExpression.accept(this);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>算数表达式中用到的字节码非常通俗易懂。字节码指令将两个操作数从出栈，执行计算，结果入栈。</p><ul><li>iadd - 整数相加。</li><li>isub - 整数相减</li><li>imul - 整数相乘</li><li>idiv - 整数相除</li></ul><p>其他数据类型的指令以此类推。</p><h2 id="4-结果"><a href="#4-结果" class="headerlink" title="4. 结果"></a>4. 结果</h2><p>假设我们有如下 Enkel 代码：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">First &#123;</span><br><span class="line">        void main (string[] args) &#123;</span><br><span class="line">            var result = 2+3*4</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>编译后的字节码如下所示：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ javap -c First</span><br><span class="line">public class First &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: bipush        2 //push 2 onto the stack</span><br><span class="line">       2: bipush        3 //push 3 onto the stack</span><br><span class="line">       4: bipush        4 //push 4 onto the stack</span><br><span class="line">       6: imul          //take two top values from the stack (3 and 4) and multiply them. Put result on stack</span><br><span class="line">       7: iadd          //take two top values from stack (2 and 12-result of imul) and add em. Put result back on stack</span><br><span class="line">       8: istore_1     //store top value from the stack into local variable at index 1 in local variable array of the curennt frame</span><br><span class="line">       9: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      &lt;blockquote&gt;
-&lt;p&gt;本文系 &lt;a href=&quot;http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Creating JVM language&lt;/a&gt; 翻译的第 8 篇。&lt;br&gt;原文中的代码和原文有不一致的地方均在新的&lt;a href=&quot;https://github.com/KevinOfNeu/Enkel&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;代码仓库&lt;/a&gt;中更正过，建议参考新的代码仓库。&lt;/p&gt;
-&lt;/blockquote&gt;
-    
-    </summary>
-    
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
