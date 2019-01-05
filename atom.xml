@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.0xff000000.com/"/>
-  <updated>2019-01-02T15:30:24.453Z</updated>
+  <updated>2019-01-05T13:54:28.637Z</updated>
   <id>https://blog.0xff000000.com/</id>
   
   <author>
@@ -17,9 +17,36 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>100 天阅读计划，深入剖析程序和计算机 - lambda 演算</title>
+    <link href="https://blog.0xff000000.com/2019/01/05/reading-plan-01-07/"/>
+    <id>https://blog.0xff000000.com/2019/01/05/reading-plan-01-07/</id>
+    <published>2019-01-05T13:00:00.000Z</published>
+    <updated>2019-01-05T13:54:28.637Z</updated>
+    
+    <content type="html"><![CDATA[<p>我们将研究一种叫作无类型 lambda 演算（untyped lambda calculus）的极小编程语言。首先，我们将用尽可能少的语言特性写（用 Ruby）一些接近 lambda 演算的程序。</p><p>这将仍然仅仅是在用 Ruby 编程，但施加虚构的约束之后，我们便能很轻松地探索一个受限的语义，而不需要学习一门新语言。然后，我们了解到这些非常有限的特性集合能做什么以后，就将利用这些特性把它们实现为一种语言（使用它自己的解析器、抽象语法和操作语义）—— 使用我们在之前章节中学到的技术。</p><a id="more"></a><h2 id="模拟lambda演算"><a href="#模拟lambda演算" class="headerlink" title="模拟lambda演算"></a>模拟lambda演算</h2><p>proc<br><code>-&gt; x { -&gt; y { x.call(y) } }</code></p><h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>写一个程序输出数字 1 到 100。但如果数字是 3 的倍数，就不输出数字而是输出“Fizz” ， 如果是 5 的倍数就输出 “Buzz” 。 对于那些 3 和 5 的公倍数， 就输出 “FizzBuzz” 。</p><p>完整特性的 Ruby 实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(1..100).map do |n|</span><br><span class="line">  if (n % 15).zero?</span><br><span class="line">    &apos;FizzBuzz&apos; </span><br><span class="line">  elsif (n % 3).zero?     </span><br><span class="line">    &apos;Fizz&apos;   </span><br><span class="line">  elsif (n % 5).zero?     </span><br><span class="line">    &apos;Buzz&apos;   </span><br><span class="line">  else     </span><br><span class="line">    n.to_s   </span><br><span class="line">end</span><br></pre></td></tr></table></figure></p><h3 id="实现数字"><a href="#实现数字" class="headerlink" title="实现数字"></a>实现数字</h3><p>描绘数字特征的一种方式是某个动作的重复（或者叫迭代）。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def one(proc, x)</span><br><span class="line">    proc[x]</span><br><span class="line">end</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def two(proc, x)</span><br><span class="line">  proc[proc[x]]</span><br><span class="line">end</span><br></pre></td></tr></table></figure><p>以此类推。<br>按照这种模式，可以很自然地把 #zero 定义为一个带有 proc 和另一个参数的方法，这个方法完全忽略 proc（换句话说，对其调用零次） ，并且会原封不动地返回第二个参数。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def zero(proc, x)</span><br><span class="line">   x </span><br><span class="line">end</span><br></pre></td></tr></table></figure><p>把 数 据 表 示 为 纯 代 码 的 技 术 称 为 邱 奇 编 码（Church encoding） ， 它 是 以lambda 演算（<a href="http://dx.doi.org/10.2307/2371045）的发明者阿隆佐·邱奇的名字命名的。这些数字是邱奇数（Church" target="_blank" rel="noopener">http://dx.doi.org/10.2307/2371045）的发明者阿隆佐·邱奇的名字命名的。这些数字是邱奇数（Church</a> numeral） ，而且我们很快将会看到邱奇布尔值（Church Boolean）和邱奇有序对（Church pair）的例子。</p><h3 id="实现布尔值"><a href="#实现布尔值" class="headerlink" title="实现布尔值"></a>实现布尔值</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">def true(x, y)   </span><br><span class="line">    x </span><br><span class="line">end  </span><br><span class="line"></span><br><span class="line">def false(x, y)</span><br><span class="line">   y </span><br><span class="line">end</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">IF =</span><br><span class="line">   -&gt; b &#123;     </span><br><span class="line">       -&gt; x &#123;       </span><br><span class="line">           -&gt; y &#123; </span><br><span class="line">                   b[x][y]       </span><br><span class="line">            &#125;     </span><br><span class="line">       &#125;   </span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure><h3 id="实现谓词"><a href="#实现谓词" class="headerlink" title="实现谓词"></a>实现谓词</h3><p><code>IS_ZERO = -&gt; n { n[-&gt; x { FALSE }][TRUE] }</code></p><h3 id="有序对"><a href="#有序对" class="headerlink" title="有序对"></a>有序对</h3><p>最简单的数据结构是有序对（pair） ，它跟二元数组类似。有序对实现起来非常容易。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PAIR  = -&gt; x &#123; -&gt; y &#123; -&gt; f &#123; f[x][y] &#125; &#125; &#125; </span><br><span class="line">LEFT  = -&gt; p &#123; p[-&gt; x &#123; -&gt; y &#123; x &#125; &#125; ] &#125; </span><br><span class="line">RIGHT = -&gt; p &#123; p[-&gt; x &#123; -&gt; y &#123; y &#125; &#125; ] &#125;</span><br></pre></td></tr></table></figure><h3 id="数值运算"><a href="#数值运算" class="headerlink" title="数值运算"></a>数值运算</h3><p>现在有了数字，布尔值，条件，谓词以及有序对，下面实现数值运算。</p><p>递增:<br><code>INCREMENT = -&gt; n { -&gt; p { -&gt; x { p[n[p][x]] } } }</code></p><p>我们调用这个新的 proc 的时候它会做什么呢？首先它会以 p 和 x 作为参数调用 n——因为n 是一个数字，所以这意味着就像原始的数字那样， “在 x 上对 p 进行 n 次调用”——然后对结果再调用一次 p。那么总体说来，这个 proc 的第一个参数会在它的第二个参数上调用n+1 次，这恰好是表示数字 n+1 的方法。</p><p>递减呢？这看起来是个更难的问题。</p><p>一个解决办法就是设计一个 proc，在对某个初始参数调用 n 次的时候返回数字 n-1。幸运的是，有序对正好可以帮助我们实现这种方法。思考一下这个 Ruby 方法所做的：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def slide(pair)   </span><br><span class="line">    [pair.last, pair.last + 1] </span><br><span class="line">end</span><br></pre></td></tr></table></figure><p>在我们用数字组成的二元数组为参数调用 slide 时，它会返回一个新的二元数组，这个二元数组包含第二个数字还有比第二个数字大 1 的数字；如果输入的数组包含的是连续数字，那么效果就是向上“滑动”一个数字窗口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; slide([3, 4]) </span><br><span class="line">=&gt; [4, 5] </span><br><span class="line">&gt;&gt; slide([8, 9]) </span><br><span class="line">=&gt; [9, 10]</span><br></pre></td></tr></table></figure></p><p>这很有用，因为通过在 -1 处开始一个窗口，我们可以安排一种情况，让数组里的第一个数字比我们调用 slide 的次数小 1，即使我们只是在递增数据 :<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; slide([-1, 0])</span><br><span class="line">=&gt; [0, 1] </span><br><span class="line">&gt;&gt; slide(slide([-1, 0])) </span><br><span class="line">=&gt; [1, 2] </span><br><span class="line">&gt;&gt; slide(slide(slide([-1, 0]))) </span><br><span class="line">=&gt; [2, 3] </span><br><span class="line">&gt;&gt; slide(slide(slide(slide([-1, 0])))) </span><br><span class="line">=&gt; [3, 4]</span><br></pre></td></tr></table></figure></p><p>我们不能只用基于 proc 的数字完成，因为没法表示 -1，但 side 的有趣之处是不管怎样它只关注数组中的第二个数，因此我们可以放入任意的哑值（dummy value）——比如说0——替换掉 -1，这样仍然能得到同样的结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; slide([0, 0]) </span><br><span class="line">=&gt; [0, 1] </span><br><span class="line">&gt;&gt; slide(slide([0, 0])) </span><br><span class="line">=&gt; [1, 2] </span><br><span class="line">&gt;&gt; slide(slide(slide([0, 0]))) </span><br><span class="line">=&gt; [2, 3] </span><br><span class="line">&gt;&gt; slide(slide(slide(slide([0, 0])))) </span><br><span class="line">=&gt; [3, 4]</span><br></pre></td></tr></table></figure></p><p>这是让 DECREMENT 工作的关键：我们可以把 slide 转成一个 proc，使用数字 n 的 proc 表示对由 ZERO 组成的有序对调用 slide n 次，然后使用 LEFT 从结果的有序对中拉出左边的数来：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SLIDE     = -&gt; p &#123; PAIR[RIGHT[p]][INCREMENT[RIGHT[p]]] &#125; </span><br><span class="line">DECREMENT = -&gt; n &#123; LEFT[n[SLIDE][PAIR[ZERO][ZERO]]] &#125;</span><br></pre></td></tr></table></figure><p><em>注：</em>DECREMENT[ZERO] 的结果实际上只是最初的 PAIR[ZERO][ZERO] 值的左边元素，在这种情况下根本就没有对其调用过 SLIDE。既然没有负值，0 就是我们能提供给 DECREMENT[ZERO] 的最合理的答案，因此使用 0 作为哑值是个好主意。</p><p>有了 INCREMENT 和 DECREMENT，就可能实现类似加法、减法、乘法和取幂这样的数字运算了：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ADD      = -&gt; m &#123; -&gt; n &#123; n[INCREMENT][m] &#125; &#125; </span><br><span class="line">SUBTRACT = -&gt; m &#123; -&gt; n &#123; n[DECREMENT][m] &#125; &#125; </span><br><span class="line">MULTIPLY = -&gt; m &#123; -&gt; n &#123; n[ADD[m]][ZERO] &#125; &#125; </span><br><span class="line">POWER    = -&gt; m &#123; -&gt; n &#123; n[MULTIPLY[m]][ONE] &#125; &#125;</span><br></pre></td></tr></table></figure><h3 id="其他实现"><a href="#其他实现" class="headerlink" title="其他实现"></a>其他实现</h3><p>MOD，map, range, 字符串都可以利用以上实现来实现，此处略。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;我们将研究一种叫作无类型 lambda 演算（untyped lambda calculus）的极小编程语言。首先，我们将用尽可能少的语言特性写（用 Ruby）一些接近 lambda 演算的程序。&lt;/p&gt;
+&lt;p&gt;这将仍然仅仅是在用 Ruby 编程，但施加虚构的约束之后，我们便能很轻松地探索一个受限的语义，而不需要学习一门新语言。然后，我们了解到这些非常有限的特性集合能做什么以后，就将利用这些特性把它们实现为一种语言（使用它自己的解析器、抽象语法和操作语义）—— 使用我们在之前章节中学到的技术。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
+    
+      <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
+    
+      <category term="lamda" scheme="https://blog.0xff000000.com/tags/lamda/"/>
+    
+  </entry>
+  
+  <entry>
     <title>100 天阅读计划，深入剖析程序和计算机 - 图灵机</title>
-    <link href="https://blog.0xff000000.com/2019/01/02/readling-plan-01-06/"/>
-    <id>https://blog.0xff000000.com/2019/01/02/readling-plan-01-06/</id>
+    <link href="https://blog.0xff000000.com/2019/01/02/reading-plan-01-06/"/>
+    <id>https://blog.0xff000000.com/2019/01/02/reading-plan-01-06/</id>
     <published>2019-01-02T15:11:00.000Z</published>
     <updated>2019-01-02T15:30:24.453Z</updated>
     
@@ -236,9 +263,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -262,9 +289,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -288,9 +315,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -314,9 +341,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -340,9 +367,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -366,9 +393,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -392,9 +419,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -418,9 +445,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -444,9 +471,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -470,9 +497,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
@@ -496,35 +523,9 @@
     </summary>
     
     
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
       <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
-      <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 9</title>
-    <link href="https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-9/"/>
-    <id>https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-9/</id>
-    <published>2018-08-24T09:00:00.000Z</published>
-    <updated>2018-08-24T09:09:59.394Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 9 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p></blockquote><a id="more"></a><h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-9" target="_blank" rel="noopener">Github</a></p><h2 id="1-语法规则改动"><a href="#1-语法规则改动" class="headerlink" title="1. 语法规则改动"></a>1. 语法规则改动</h2><p>我们新建一个规则 “returnStatement”。<br>那为什么不叫 “returnExpression” 呢？毕竟表达式总是返回值的，语句没有返回值么?<br>这听起来有点绕口，但是返回值并不总是返回一个值。在 Java 中，代码 <code>int x = return 5;</code> 没有意义， 在 Enkel 中也是如此。换句话说，表达式总可以给一个变量赋值。这就是为什么返回是语句，而不是表达式。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">statement : variableDeclaration</span><br><span class="line">           //other statements rules</span><br><span class="line">           | returnStatement ;</span><br><span class="line"></span><br><span class="line">variableDeclaration : VARIABLE name EQUALS expression;</span><br><span class="line">printStatement : PRINT expression ;</span><br><span class="line">returnStatement : &apos;return&apos; #RETURNVOID</span><br><span class="line">                | (&apos;return&apos;)? expression #RETURNWITHVALUE;</span><br></pre></td></tr></table></figure><p>返回语句有两种形式：</p><ul><li>RETURNVOID - 用在没有返回值的方法中。return 关键字是必须的，后面不需要表达式</li><li>RETURNWITHVALUE - 用在有返回值的方法中。return 关键字不是必须的，但是需要一个表达式</li></ul><p>因此，方法可以显示或者隐士的返回一个值：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SomeClass &#123;</span><br><span class="line">    fun1 &#123;</span><br><span class="line">       return  //explicitly return from void method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    fun2 &#123;</span><br><span class="line">        //implicitly return from void method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int fun2 &#123;</span><br><span class="line">        return 1  //explicitly return &quot;1&quot; from int method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int fun3 &#123;</span><br><span class="line">        1  //implicitly return &quot;1&quot; from int method</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>上述代码经过解析后，AST 图形展示如下：<br><img src="http://jakubdziworski.github.io/assets/media/enkel_9/parse_tree.gif" alt=""></p><p>我们可以看到，AST 中并没有处理 fun2 中的隐士返回值。这是因为方法是空的语句块，匹配空的语句块作为返回值并不是一个好的想法。因此，确实的返回语句会在字节码生成阶段手动添加。</p><h2 id="2-匹配-Antlr-上下文对象"><a href="#2-匹配-Antlr-上下文对象" class="headerlink" title="2. 匹配 Antlr 上下文对象"></a>2. 匹配 Antlr 上下文对象</h2><p>经过解析后，返回语句从 antlr 的上下文对象转换成 POJO 类 <code>ReturnStatement</code> 。这一步的目的是仅匹配字节码生成需要的数据，而不是直接从 antlr 生成的对象中取数据，这样会让代码看起来很丑陋。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class StatementVisitor extends EnkelBaseVisitor&lt;Statement&gt; &#123;</span><br><span class="line"></span><br><span class="line">    //other stuff</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public Statement visitRETURNVOID(@NotNull EnkelParser.RETURNVOIDContext ctx) &#123;</span><br><span class="line">        return new ReturnStatement(new EmptyExpression(BultInType.VOID));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public Statement visitRETURNWITHVALUE(@NotNull EnkelParser.RETURNWITHVALUEContext ctx) &#123;</span><br><span class="line">        Expression expression = ctx.expression().accept(expressionVisitor); </span><br><span class="line">        return new ReturnStatement(expression);</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="3-检测隐士空返回"><a href="#3-检测隐士空返回" class="headerlink" title="3. 检测隐士空返回"></a>3. 检测隐士空返回</h2><p>假设方法中包含有隐士返回，在解析阶段是不会生成返回语句的，这就是为什么我们需要检测这种情景，并且在字节码生成阶段手动添加返回语句。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class MethodGenerator &#123;</span><br><span class="line">    //other stuff</span><br><span class="line">    private void appendReturnIfNotExists(Function function, Block block,StatementGenerator statementScopeGenrator) &#123;</span><br><span class="line">        Statement lastStatement = block.getStatements().get(block.getStatements().size() - 1);</span><br><span class="line">        boolean isLastStatementReturn = lastStatement instanceof ReturnStatement;</span><br><span class="line">        if(!isLastStatementReturn) &#123;</span><br><span class="line">            EmptyExpression emptyExpression = new EmptyExpression(function.getReturnType());</span><br><span class="line">            ReturnStatement returnStatement = new ReturnStatement(emptyExpression);</span><br><span class="line">            returnStatement.accept(statementScopeGenrator);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>上述方法检测方法最后的语句是不是返回语句，如果不是就添加返回指令。</p><h2 id="4-生成字节码"><a href="#4-生成字节码" class="headerlink" title="4. 生成字节码"></a>4. 生成字节码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class StatementGenerator &#123;</span><br><span class="line">    //oher stuff</span><br><span class="line">    public void generate(ReturnStatement returnStatement) &#123;</span><br><span class="line">        Expression expression = returnStatement.getExpression();</span><br><span class="line">        Type type = expression.getType();</span><br><span class="line">        expression.accept(expressionGenrator); //generate bytecode for expression itself (puts the value of expression onto the stack)</span><br><span class="line">        if(type == BultInType.VOID) &#123;</span><br><span class="line">            methodVisitor.visitInsn(Opcodes.RETURN);</span><br><span class="line">        &#125; else if (type == BultInType.INT) &#123;</span><br><span class="line">            methodVisitor.visitInsn(Opcodes.IRETURN);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>因此，<code>return 5</code> 会经过如下阶段：</p><ul><li>从返回语句中获得表达式（这里是5，类型是值）</li><li>生成 5 对应的字节码。（expression.accept(expressionGenerator) 调用 ExpressionGenerator.generate(Value value)）</li><li>字节码生成阶段，会生成一个新的值 5 并压入操作数栈</li><li>IRETURN 指令将操作数栈栈顶数据出栈，并返回</li></ul><p>字节码表示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bipush        5</span><br><span class="line">ireturn</span><br></pre></td></tr></table></figure></p><h2 id="5-示例"><a href="#5-示例" class="headerlink" title="5. 示例"></a>5. 示例</h2><p>假设我们又如下 Enkel 代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SumCalculator &#123;</span><br><span class="line"></span><br><span class="line">    void main(string[] args) &#123;</span><br><span class="line">        print sum(5,2)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int sum (int x ,int y) &#123;</span><br><span class="line">        x+y</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>生成的字节码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ javap -c  SumCalculator</span><br><span class="line">public class SumCalculator &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #12                 //get static field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: bipush        5</span><br><span class="line">       5: bipush        2</span><br><span class="line">       7: invokestatic  #16                 // call method sum (with the values on operand stack 5,2)</span><br><span class="line">      10: invokevirtual #21                 // call method println (with the value on stack - the result of method sum)</span><br><span class="line">      13: return                           //return</span><br><span class="line"></span><br><span class="line">  public static int sum(int, int);</span><br><span class="line">    Code:</span><br><span class="line">       0: iload_0</span><br><span class="line">       1: iload_1</span><br><span class="line">       2: iadd</span><br><span class="line">       3: ireturn //return the value from operand stack (result of iadd)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;blockquote&gt;
-&lt;p&gt;本文系 &lt;a href=&quot;http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Creating JVM language&lt;/a&gt; 翻译的第 9 篇。&lt;br&gt;原文中的代码和原文有不一致的地方均在新的&lt;a href=&quot;https://github.com/KevinOfNeu/Enkel&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;代码仓库&lt;/a&gt;中更正过，建议参考新的代码仓库。&lt;/p&gt;
-&lt;/blockquote&gt;
-    
-    </summary>
-    
-    
       <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
       <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
     
