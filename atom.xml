@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.0xff000000.com/"/>
-  <updated>2019-01-17T14:48:17.684Z</updated>
+  <updated>2019-04-26T08:30:59.751Z</updated>
   <id>https://blog.0xff000000.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>OSX Mojave 编译 &amp; 源码调试 openJdk 8</title>
+    <link href="https://blog.0xff000000.com/2019/04/26/compile-debug-openjdk8-on-osx/"/>
+    <id>https://blog.0xff000000.com/2019/04/26/compile-debug-openjdk8-on-osx/</id>
+    <published>2019-04-26T08:00:00.000Z</published>
+    <updated>2019-04-26T08:30:59.751Z</updated>
+    
+    <content type="html"><![CDATA[<p>为了更好的理解和学习 Java 和 Hotspot 虚拟机，于是在 OSX Mojave 编译 &amp; 源码调试 openJdk 8，中间遇到了很多问题，记录分享一下。<br><a id="more"></a></p><h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><ul><li style="list-style: none"><input type="checkbox"> Xcode 版本</li><li style="list-style: none"><input type="checkbox"> 源码中不规范写法</li><li style="list-style: none"><input type="checkbox"> slowdebug 中官方无解的 crash</li></ul><h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ul><li style="list-style: none"><input type="checkbox"> Xcode 9.1</li><li style="list-style: none"><input type="checkbox"> <code>xcode-select --install</code></li><li style="list-style: none"><input type="checkbox"> Homebrew</li><li style="list-style: none"><input type="checkbox"> <code>brew install mercurial</code></li><li style="list-style: none"><input type="checkbox"> XQuartz</li><li style="list-style: none"><input type="checkbox"> JDK 8</li><li style="list-style: none"><input type="checkbox"> <code>brew install freetype</code></li></ul><p><em>注</em>：这里使用老版本的 Xcode，因为 Xcode 10 后，<code>libstd</code> 废除，改用 <code>libc++</code>，导致编译错误。</p><h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p><code>hg clone http://hg.openjdk.java.net/jdk8/jdk8 JDK8</code><br><code>cd JDK8</code><br><code>bash ./get_source.sh</code></p><h2 id="编译相关设置"><a href="#编译相关设置" class="headerlink" title="编译相关设置"></a>编译相关设置</h2><p>创建 <code>envsetup.sh</code> 文件。</p><p><code>touch envsetup.sh</code></p><p>写入如下内容：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"># 设定语言选项，必须设置</span><br><span class="line">export LANG=C</span><br><span class="line"># Mac平台，C编译器不再是GCC，是clang</span><br><span class="line">export CC=gcc</span><br><span class="line"># 跳过clang的一些严格的语法检查，不然会将N多的警告作为Error</span><br><span class="line">export COMPILER_WARNINGS_FATAL=false</span><br><span class="line"># 链接时使用的参数</span><br><span class="line">export LFLAGS=&apos;-Xlinker -lstdc++&apos;</span><br><span class="line"># 是否使用clang</span><br><span class="line">export USE_CLANG=true</span><br><span class="line"># 使用64位数据模型</span><br><span class="line">export LP64=1</span><br><span class="line"># 告诉编译平台是64位，不然会按32位来编译</span><br><span class="line">export ARCH_DATA_MODEL=64</span><br><span class="line"># 允许自动下载依赖</span><br><span class="line">export ALLOW_DOWNLOADS=true</span><br><span class="line"># 并行编译的线程数，编译时间长，为了不影响其他工作，我选择为2</span><br><span class="line">export HOTSPOT_BUILD_JOBS=4</span><br><span class="line">export ALT_PARALLEL_COMPILE_JOBS=4</span><br><span class="line"># 是否跳过与先前版本的比较</span><br><span class="line">export SKIP_COMPARE_IMAGES=true</span><br><span class="line"># 是否使用预编译头文件，加快编译速度</span><br><span class="line">export USE_PRECOMPILED_HEADER=true</span><br><span class="line"># 是否使用增量编译</span><br><span class="line">export INCREMENTAL_BUILD=true</span><br><span class="line"># 编译内容</span><br><span class="line">export BUILD_LANGTOOLS=true</span><br><span class="line">export BUILD_JAXP=false</span><br><span class="line">export BUILD_JAXWS=false</span><br><span class="line">export BUILD_CORBA=false</span><br><span class="line">export BUILD_HOTSPOT=true</span><br><span class="line">export BUILD_JDK=true</span><br><span class="line"># 编译版本</span><br><span class="line">export SKIP_DEBUG_BUILD=true</span><br><span class="line">export SKIP_FASTDEBUG_BUILD=false</span><br><span class="line">export DEBUG_NAME=debug</span><br><span class="line"># 避开javaws和浏览器Java插件之类的部分的build</span><br><span class="line">export BUILD_DEPLOY=false</span><br><span class="line">export BUILD_INSTALL=false</span><br><span class="line"># 加上产生调试信息时需要的 objcopy</span><br><span class="line">export OBJCOPY=gobjcopy</span><br></pre></td></tr></table></figure><p>然后执行 <code>source envsetup.sh</code>。</p><h2 id="configure"><a href="#configure" class="headerlink" title="configure"></a>configure</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash ./configure \</span><br><span class="line">    --with-target-bits=64 \</span><br><span class="line">    --with-debug-level=slowdebug --enable-debug-symbols \</span><br><span class="line">    ZIP_DEBUGINFO_FILES=0</span><br></pre></td></tr></table></figure><p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080133.png" alt=""></p><h2 id="make"><a href="#make" class="headerlink" title="make"></a>make</h2><p>编译！</p><p><code>make all</code></p><p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080219.png" alt=""></p><h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>编译结束后，会看到如下图输出：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080410.png" alt=""></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd build/macosx-x86_64-normal-server-slowdebug/jdk/bin</span><br><span class="line">$ ./java -version</span><br><span class="line">openjdk version &quot;1.8.0-internal-debug&quot;</span><br><span class="line">OpenJDK Runtime Environment (build 1.8.0-internal-debug-kevin_2019_04_20_21_08-b00)</span><br><span class="line">OpenJDK 64-Bit Server VM (build 25.0-b70-debug, mixed mode)</span><br></pre></td></tr></table></figure><p>这里 slowdebug 会出现 crash，需要注释掉如下代码：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-081547.png" alt=""></p><h2 id="导入-Clion"><a href="#导入-Clion" class="headerlink" title="导入 Clion"></a>导入 Clion</h2><p><code>File-&gt;ImportProject</code>，导入 Hotspot 目录。<br>Clion 会生成 CMakeList 文件。不用理会，无脑 next。</p><h2 id="源码调试"><a href="#源码调试" class="headerlink" title="源码调试"></a>源码调试</h2><p>在 Clion 中，<code>Edit configuration</code>：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080959.png" alt=""><br>下一步点击 <code>debug</code> 按钮:<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-082432.png" alt=""></p><p>Happy Hacking!</p><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul><li><a href="https://imkiva.com/2018/02/24/building-openjdk8-on-macos/" target="_blank" rel="noopener">https://imkiva.com/2018/02/24/building-openjdk8-on-macos/</a></li><li><a href="https://imkiva.com/2018/02/24/debugging-hotspot-using-xcode/" target="_blank" rel="noopener">https://imkiva.com/2018/02/24/debugging-hotspot-using-xcode/</a></li><li><a href="https://stackoverflow.com/questions/50963410/build-openjdk9-on-macos-and-crash" target="_blank" rel="noopener">https://stackoverflow.com/questions/50963410/build-openjdk9-on-macos-and-crash</a></li><li><a href="https://stackoverflow.com/questions/50678467/building-openjdk-9-on-mac-os/54954805#54954805" target="_blank" rel="noopener">https://stackoverflow.com/questions/50678467/building-openjdk-9-on-mac-os/54954805#54954805</a></li><li><a href="https://www.jianshu.com/p/ee7e9176632c" target="_blank" rel="noopener">https://www.jianshu.com/p/ee7e9176632c</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;为了更好的理解和学习 Java 和 Hotspot 虚拟机，于是在 OSX Mojave 编译 &amp;amp; 源码调试 openJdk 8，中间遇到了很多问题，记录分享一下。&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
+    
+      <category term="Hotspot" scheme="https://blog.0xff000000.com/tags/Hotspot/"/>
+    
+      <category term="Debug" scheme="https://blog.0xff000000.com/tags/Debug/"/>
+    
+      <category term="Compile" scheme="https://blog.0xff000000.com/tags/Compile/"/>
+    
+  </entry>
   
   <entry>
     <title>100 天阅读计划，深入剖析程序和计算机 - 抽象解释 &amp; 静态语义</title>
@@ -33,9 +59,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -64,9 +90,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -90,9 +116,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -139,9 +165,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -165,9 +191,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -191,9 +217,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -217,9 +243,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -243,9 +269,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -268,9 +294,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -292,9 +318,9 @@
     </summary>
     
     
-      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
-    
       <category term="计划" scheme="https://blog.0xff000000.com/tags/%E8%AE%A1%E5%88%92/"/>
+    
+      <category term="阅读" scheme="https://blog.0xff000000.com/tags/%E9%98%85%E8%AF%BB/"/>
     
       <category term="100 天" scheme="https://blog.0xff000000.com/tags/100-%E5%A4%A9/"/>
     
@@ -494,32 +520,6 @@
     
       &lt;blockquote&gt;
 &lt;p&gt;本文系 &lt;a href=&quot;http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Creating JVM language&lt;/a&gt; 翻译的第 15 篇。&lt;br&gt;原文中的代码和原文有不一致的地方均在新的&lt;a href=&quot;https://github.com/KevinOfNeu/Enkel&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;代码仓库&lt;/a&gt;中更正过，建议参考新的代码仓库。&lt;/p&gt;
-&lt;/blockquote&gt;
-    
-    </summary>
-    
-    
-      <category term="翻译" scheme="https://blog.0xff000000.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-      <category term="Enkel" scheme="https://blog.0xff000000.com/tags/Enkel/"/>
-    
-      <category term="JVM" scheme="https://blog.0xff000000.com/tags/JVM/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 14</title>
-    <link href="https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-14/"/>
-    <id>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-14/</id>
-    <published>2018-09-04T14:14:00.000Z</published>
-    <updated>2018-09-04T14:54:14.803Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 14 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p></blockquote><a id="more"></a><h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-14" target="_blank" rel="noopener">Github</a></p><h2 id="支持新的类型"><a href="#支持新的类型" class="headerlink" title="支持新的类型"></a>支持新的类型</h2><p>目前为止 Enkel 仅支持了整数类型和字符串类型。是时候支持其他的原始类型了。这也是为创建面向对象特性做准备。</p><h2 id="指令集的抽象"><a href="#指令集的抽象" class="headerlink" title="指令集的抽象"></a>指令集的抽象</h2><p>字节码指令中有很多指令仅仅是在数据类型上有区别，以 return 指令举例：</p><ul><li>return - 方法返回</li><li>ireturn - 返回interger</li><li>freturn - 返回float</li><li>dreturn - 返回double</li><li>lreturn - 返回long</li><li>areturn - 返回引用</li></ul><p>字节码生成的时候，我们多写一点 case 语句可以实现，但是很丑陋。因此我用 TypeSpecificOpcodes 枚举存储了所有类型对应的字节码指令：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public enum TypeSpecificOpcodes &#123; </span><br><span class="line"></span><br><span class="line">    INT (ILOAD, ISTORE, IRETURN,IADD,ISUB,IMUL,IDIV), //values (-127,127) - one byte.</span><br><span class="line">    LONG (LLOAD, LSTORE, LRETURN,LADD,LSUB,LMUL,LDIV),</span><br><span class="line">    FLOAT (FLOAD, FSTORE, FRETURN,FADD,FSUB,FMUL,FDIV),</span><br><span class="line">    DOUBLE (DLOAD, DSTORE, DRETURN,DADD,DSUB,DMUL,DDIV),</span><br><span class="line">    VOID(ALOAD, ASTORE, RETURN,0,0,0,0),</span><br><span class="line">    OBJECT (ALOAD,ASTORE,ARETURN,0,0,0,0);</span><br><span class="line"></span><br><span class="line">    TypeSpecificOpcodes(int load, int store, int ret, int add, int sub, int mul, int div) &#123;</span><br><span class="line">        //assign each parameter to the field</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    //getters</span><br></pre></td></tr></table></figure><p>类型相关的字节码指令，目前我们用到了：</p><ul><li>load - 从局部变量表中加载变量</li><li>store - 存储至局部变量表</li><li>ret - 返回</li><li>add - 操作数栈中两个数相加</li><li>sub - 栈中操作数相减</li><li>mul - 栈中操作数相乘</li><li>div - 栈中操作数相除</li></ul><p>TypeSpecificOpcodes 是在 BultInType 类中：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public enum BultInType implements Type &#123;</span><br><span class="line">    BOOLEAN(&quot;bool&quot;,boolean.class,&quot;Z&quot;, TypeSpecificOpcodes.INT),</span><br><span class="line">    </span><br><span class="line">    //other members</span><br><span class="line">    </span><br><span class="line">    BultInType(String name, Class&lt;?&gt; typeClass, String descriptor, TypeSpecificOpcodes opcodes) &#123;</span><br><span class="line">        //assign to fields</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public int getMultiplyOpcode() &#123;</span><br><span class="line">        return opcodes.getMultiply();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure><p>无论何时，两个数相乘，只要知道类型就可以了，再也不用查找类型对应的字节码指令：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public void generate(Multiplication expression) &#123;</span><br><span class="line">    evaluateArthimeticComponents(expression);</span><br><span class="line">    Type type = expression.getType();</span><br><span class="line">    methodVisitor.visitInsn(type.getMultiplyOpcode());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>如下 Enkel 代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">main(string[] args) &#123;</span><br><span class="line">        var stringVar = &quot;str&quot;</span><br><span class="line">        var booleanVar = true</span><br><span class="line">        var integerVar = 2745 + 33</span><br><span class="line">        var doubleVar = 2343.05</span><br><span class="line">        var sumOfDoubleVars =  23.0 + doubleVar</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p><p>编译后的字节码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public class AllPrimitiveTypes &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: ldc           #8                  // String str</span><br><span class="line">       2: astore_1                          //store it variable</span><br><span class="line">       3: ldc           #9                  // int 1 - bool values are represented as ints in JVM</span><br><span class="line">       5: istore_2                          //store as int </span><br><span class="line">       6: ldc           #10                 // int 2745 </span><br><span class="line">       8: ldc           #11                 // int 33</span><br><span class="line">      10: iadd                              // iadd - add integers</span><br><span class="line">      11: istore_3                          //store result in integer varaible</span><br><span class="line">      12: ldc           #12                 // float 2343.05f </span><br><span class="line">      14: fstore        4                   //store in float variable</span><br><span class="line">      16: ldc           #13                 // float 23.0f </span><br><span class="line">      18: fload         4                   //load integer varaible (from index 4)</span><br><span class="line">      20: fadd                              //add float variables</span><br><span class="line">      21: fstore        5                   //store float result</span><br><span class="line">      23: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;blockquote&gt;
-&lt;p&gt;本文系 &lt;a href=&quot;http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Creating JVM language&lt;/a&gt; 翻译的第 14 篇。&lt;br&gt;原文中的代码和原文有不一致的地方均在新的&lt;a href=&quot;https://github.com/KevinOfNeu/Enkel&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;代码仓库&lt;/a&gt;中更正过，建议参考新的代码仓库。&lt;/p&gt;
 &lt;/blockquote&gt;
     
     </summary>

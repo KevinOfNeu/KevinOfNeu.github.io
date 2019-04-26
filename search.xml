@@ -3,6 +3,27 @@
   
     
     <entry>
+      <title>OSX Mojave 编译 &amp; 源码调试 openJdk 8</title>
+      <link href="/2019/04/26/compile-debug-openjdk8-on-osx/"/>
+      <url>/2019/04/26/compile-debug-openjdk8-on-osx/</url>
+      <content type="html"><![CDATA[<p>为了更好的理解和学习 Java 和 Hotspot 虚拟机，于是在 OSX Mojave 编译 &amp; 源码调试 openJdk 8，中间遇到了很多问题，记录分享一下。<br><a id="more"></a></p><h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><ul><li style="list-style: none"><input type="checkbox"> Xcode 版本</li><li style="list-style: none"><input type="checkbox"> 源码中不规范写法</li><li style="list-style: none"><input type="checkbox"> slowdebug 中官方无解的 crash</li></ul><h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ul><li style="list-style: none"><input type="checkbox"> Xcode 9.1</li><li style="list-style: none"><input type="checkbox"> <code>xcode-select --install</code></li><li style="list-style: none"><input type="checkbox"> Homebrew</li><li style="list-style: none"><input type="checkbox"> <code>brew install mercurial</code></li><li style="list-style: none"><input type="checkbox"> XQuartz</li><li style="list-style: none"><input type="checkbox"> JDK 8</li><li style="list-style: none"><input type="checkbox"> <code>brew install freetype</code></li></ul><p><em>注</em>：这里使用老版本的 Xcode，因为 Xcode 10 后，<code>libstd</code> 废除，改用 <code>libc++</code>，导致编译错误。</p><h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p><code>hg clone http://hg.openjdk.java.net/jdk8/jdk8 JDK8</code><br><code>cd JDK8</code><br><code>bash ./get_source.sh</code></p><h2 id="编译相关设置"><a href="#编译相关设置" class="headerlink" title="编译相关设置"></a>编译相关设置</h2><p>创建 <code>envsetup.sh</code> 文件。</p><p><code>touch envsetup.sh</code></p><p>写入如下内容：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"># 设定语言选项，必须设置</span><br><span class="line">export LANG=C</span><br><span class="line"># Mac平台，C编译器不再是GCC，是clang</span><br><span class="line">export CC=gcc</span><br><span class="line"># 跳过clang的一些严格的语法检查，不然会将N多的警告作为Error</span><br><span class="line">export COMPILER_WARNINGS_FATAL=false</span><br><span class="line"># 链接时使用的参数</span><br><span class="line">export LFLAGS=&apos;-Xlinker -lstdc++&apos;</span><br><span class="line"># 是否使用clang</span><br><span class="line">export USE_CLANG=true</span><br><span class="line"># 使用64位数据模型</span><br><span class="line">export LP64=1</span><br><span class="line"># 告诉编译平台是64位，不然会按32位来编译</span><br><span class="line">export ARCH_DATA_MODEL=64</span><br><span class="line"># 允许自动下载依赖</span><br><span class="line">export ALLOW_DOWNLOADS=true</span><br><span class="line"># 并行编译的线程数，编译时间长，为了不影响其他工作，我选择为2</span><br><span class="line">export HOTSPOT_BUILD_JOBS=4</span><br><span class="line">export ALT_PARALLEL_COMPILE_JOBS=4</span><br><span class="line"># 是否跳过与先前版本的比较</span><br><span class="line">export SKIP_COMPARE_IMAGES=true</span><br><span class="line"># 是否使用预编译头文件，加快编译速度</span><br><span class="line">export USE_PRECOMPILED_HEADER=true</span><br><span class="line"># 是否使用增量编译</span><br><span class="line">export INCREMENTAL_BUILD=true</span><br><span class="line"># 编译内容</span><br><span class="line">export BUILD_LANGTOOLS=true</span><br><span class="line">export BUILD_JAXP=false</span><br><span class="line">export BUILD_JAXWS=false</span><br><span class="line">export BUILD_CORBA=false</span><br><span class="line">export BUILD_HOTSPOT=true</span><br><span class="line">export BUILD_JDK=true</span><br><span class="line"># 编译版本</span><br><span class="line">export SKIP_DEBUG_BUILD=true</span><br><span class="line">export SKIP_FASTDEBUG_BUILD=false</span><br><span class="line">export DEBUG_NAME=debug</span><br><span class="line"># 避开javaws和浏览器Java插件之类的部分的build</span><br><span class="line">export BUILD_DEPLOY=false</span><br><span class="line">export BUILD_INSTALL=false</span><br><span class="line"># 加上产生调试信息时需要的 objcopy</span><br><span class="line">export OBJCOPY=gobjcopy</span><br></pre></td></tr></table></figure><p>然后执行 <code>source envsetup.sh</code>。</p><h2 id="configure"><a href="#configure" class="headerlink" title="configure"></a>configure</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash ./configure \</span><br><span class="line">    --with-target-bits=64 \</span><br><span class="line">    --with-debug-level=slowdebug --enable-debug-symbols \</span><br><span class="line">    ZIP_DEBUGINFO_FILES=0</span><br></pre></td></tr></table></figure><p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080133.png" alt=""></p><h2 id="make"><a href="#make" class="headerlink" title="make"></a>make</h2><p>编译！</p><p><code>make all</code></p><p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080219.png" alt=""></p><h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>编译结束后，会看到如下图输出：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080410.png" alt=""></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cd build/macosx-x86_64-normal-server-slowdebug/jdk/bin</span><br><span class="line">$ ./java -version</span><br><span class="line">openjdk version &quot;1.8.0-internal-debug&quot;</span><br><span class="line">OpenJDK Runtime Environment (build 1.8.0-internal-debug-kevin_2019_04_20_21_08-b00)</span><br><span class="line">OpenJDK 64-Bit Server VM (build 25.0-b70-debug, mixed mode)</span><br></pre></td></tr></table></figure><p>这里 slowdebug 会出现 crash，需要注释掉如下代码：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-081547.png" alt=""></p><h2 id="导入-Clion"><a href="#导入-Clion" class="headerlink" title="导入 Clion"></a>导入 Clion</h2><p><code>File-&gt;ImportProject</code>，导入 Hotspot 目录。<br>Clion 会生成 CMakeList 文件。不用理会，无脑 next。</p><h2 id="源码调试"><a href="#源码调试" class="headerlink" title="源码调试"></a>源码调试</h2><p>在 Clion 中，<code>Edit configuration</code>：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-080959.png" alt=""><br>下一步点击 <code>debug</code> 按钮:<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2019-04-26-082432.png" alt=""></p><p>Happy Hacking!</p><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul><li><a href="https://imkiva.com/2018/02/24/building-openjdk8-on-macos/" target="_blank" rel="noopener">https://imkiva.com/2018/02/24/building-openjdk8-on-macos/</a></li><li><a href="https://imkiva.com/2018/02/24/debugging-hotspot-using-xcode/" target="_blank" rel="noopener">https://imkiva.com/2018/02/24/debugging-hotspot-using-xcode/</a></li><li><a href="https://stackoverflow.com/questions/50963410/build-openjdk9-on-macos-and-crash" target="_blank" rel="noopener">https://stackoverflow.com/questions/50963410/build-openjdk9-on-macos-and-crash</a></li><li><a href="https://stackoverflow.com/questions/50678467/building-openjdk-9-on-mac-os/54954805#54954805" target="_blank" rel="noopener">https://stackoverflow.com/questions/50678467/building-openjdk-9-on-mac-os/54954805#54954805</a></li><li><a href="https://www.jianshu.com/p/ee7e9176632c" target="_blank" rel="noopener">https://www.jianshu.com/p/ee7e9176632c</a></li></ul>]]></content>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+            <tag> Hotspot </tag>
+            
+            <tag> Debug </tag>
+            
+            <tag> Compile </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>100 天阅读计划，深入剖析程序和计算机 - 抽象解释 &amp; 静态语义</title>
       <link href="/2019/01/17/reading-plan-01-10/"/>
       <url>/2019/01/17/reading-plan-01-10/</url>
@@ -11,9 +32,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -34,9 +55,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -55,9 +76,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -93,9 +114,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -114,9 +135,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -135,9 +156,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -156,9 +177,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -177,9 +198,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -196,9 +217,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -215,9 +236,9 @@
       
         <tags>
             
-            <tag> 阅读 </tag>
-            
             <tag> 计划 </tag>
+            
+            <tag> 阅读 </tag>
             
             <tag> 100 天 </tag>
             
@@ -796,9 +817,9 @@
       
         <tags>
             
-            <tag> 计划 </tag>
-            
             <tag> 书籍 </tag>
+            
+            <tag> 计划 </tag>
             
         </tags>
       
