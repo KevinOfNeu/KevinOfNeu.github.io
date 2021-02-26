@@ -19,7 +19,7 @@
   
   
   <link rel="icon" type="image/x-icon" href="/logo.png">
-  <title>archives [ 叫兽的博客 ]</title>
+  <title>tag: redux [ 叫兽的博客 ]</title>
   
     <!-- stylesheets list from config.yml -->
     
@@ -46,7 +46,7 @@
           
       
           
-            <li class="pure-menu-item actived"><a href="/archives" class="pure-menu-link">归档</a></li>
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
           
       
           
@@ -73,226 +73,23 @@
   <div class="container" id="content-outer">
     <div class="inner" id="content-inner">
       
-
+<div class="page tag-page" id="tag">
+  <h3 title="redux下的文章">redux</h3>
   
-  
-    
-    
-    <section class="post page archives">
-      <h3 class="archive-year-wrap">
-        <a href="/archives/2018" class="archive-year">
-          2018
+    <div class="tag-item">
+      
+        <a href="/2021/02/26/Redux/">
+          Redux 架构概览和原理剖析
         </a>
-      </h3>
-      <div class="archives">
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/08/18/Creating-JVM-Language-Part-5/">
-    <div>
-      <span class="date">
-        08-18
-      </span>
-      <span class="slash">/</span>
-      手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 5
+      
+      <time class="time" datetime="2021-02-26T12:30:00.000Z">
+        2021-02-26
+      </time>
     </div>
-
-    <!--<div class="excerpt">-->
-      <!--<blockquote>
-<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第五篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p>
-</blockquote>-->
-    <!--</div>-->
-  </a>
-
+  
 </div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/07/29/sun-misc-unsafe/">
-    <div>
-      <span class="date">
-        07-29
-      </span>
-      <span class="slash">/</span>
-      Java 的 Unsafe 类
     </div>
 
-    <!--<div class="excerpt">-->
-      <!--<p>本文主要介绍一下 JDK 里的核弹之 <code>sun.misc.Unsage</code> 类。<br>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/07/28/jvm-classification/">
-    <div>
-      <span class="date">
-        07-28
-      </span>
-      <span class="slash">/</span>
-      独立型 JVM 和寄生型 JVM 比较
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<p>本文系 R 大在 2013 年在 ITEYE 高级语言虚拟机论坛的开坑之作，即便是现在看来还是有很大的启发意义，于是整理了一下。<br>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/07/03/Install-Bochs-on-macOS-High-Sierra/">
-    <div>
-      <span class="date">
-        07-03
-      </span>
-      <span class="slash">/</span>
-      macOS High Sierra 10.13.2 上安装 Bochs
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<p>macOS High Sierra 10.13.2 上安装 Bochs<br>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/06/10/Creating-JVM-Language-Part-4/">
-    <div>
-      <span class="date">
-        06-10
-      </span>
-      <span class="slash">/</span>
-      手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 4
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<blockquote>
-<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第四篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p>
-</blockquote>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/05/07/Context-of-JavaScript-Calling/">
-    <div>
-      <span class="date">
-        05-07
-      </span>
-      <span class="slash">/</span>
-      JavaScript 方法调用和 this 解析
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<p><a href="http://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/" target="_blank" rel="noopener">原文地址</a></p>
-<p>一直以来，我对 JavaScript 的方法调用存有困惑。尤其是很多人一直抱怨，方法中的 <code>this</code> 语义含糊不清。</p>
-<p>在我看来，只要理解了方法调用原语就可以解开这些疑惑，其他所有的方法调用都可以认为是原语上的语法糖。事实上，ECMAScript 规范就是这么做的，这篇文章可以认为是简化版的规范说明，基本思路是一样的。</p>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/05/01/Creating-JVM-Language-Part-3/">
-    <div>
-      <span class="date">
-        05-01
-      </span>
-      <span class="slash">/</span>
-      手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 3
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<blockquote>
-<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第三篇。</p>
-</blockquote>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/04/11/Elm-guide-01/">
-    <div>
-      <span class="date">
-        04-11
-      </span>
-      <span class="slash">/</span>
-      Elm 入门指南 - 安装
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<p>Elm 语言入门系列。<br>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/04/09/Elm-guide/">
-    <div>
-      <span class="date">
-        04-09
-      </span>
-      <span class="slash">/</span>
-      Elm 入门指南 - 介绍
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<p>Elm 语言入门系列。<br>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-  
-  
-  <div class="archive" >
-  <a class="post-go" href="/2018/04/07/Creating-JVM-Language-Part-2/">
-    <div>
-      <span class="date">
-        04-07
-      </span>
-      <span class="slash">/</span>
-      手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 2
-    </div>
-
-    <!--<div class="excerpt">-->
-      <!--<blockquote>
-<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第二篇。</p>
-</blockquote>-->
-    <!--</div>-->
-  </a>
-
-</div>
-
-
-  </div></section>
-
-    </div>
-
-    
-      <nav class="page-nav text-center">
-          <a class="extend prev" rel="prev" href="/archives/page/3/">〈</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/archives/page/5/">5</a><a class="extend next" rel="next" href="/archives/page/5/">〉</a>
-      </nav>
     
 
   </div>

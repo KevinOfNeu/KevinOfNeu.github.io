@@ -2,254 +2,261 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://blog.0xff000000.com/2021/02/26/Redux/</loc>
+    
+    <lastmod>2021-02-26T16:12:37.485Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://blog.0xff000000.com/2019/04/26/compile-debug-openjdk8-on-osx/</loc>
     
-    <lastmod>2019-04-26T08:30:59.751Z</lastmod>
+    <lastmod>2019-04-26T08:30:59.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/17/reading-plan-01-10/</loc>
     
-    <lastmod>2019-01-17T14:48:17.684Z</lastmod>
+    <lastmod>2019-01-17T14:48:17.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/14/reading-plan-01-09/</loc>
     
-    <lastmod>2019-01-14T12:55:44.425Z</lastmod>
+    <lastmod>2019-01-14T12:55:44.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/11/reading-plan-01-08/</loc>
     
-    <lastmod>2019-01-11T08:32:09.898Z</lastmod>
+    <lastmod>2019-01-11T08:32:09.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/10/essays-00/</loc>
     
-    <lastmod>2019-01-10T15:27:55.593Z</lastmod>
+    <lastmod>2019-01-10T15:27:55.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/05/reading-plan-01-07/</loc>
     
-    <lastmod>2019-01-05T13:54:28.637Z</lastmod>
+    <lastmod>2019-01-05T13:54:28.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2019/01/02/reading-plan-01-06/</loc>
     
-    <lastmod>2019-01-02T15:30:24.453Z</lastmod>
+    <lastmod>2019-01-02T15:30:24.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/12/30/reading-plan-01-05/</loc>
     
-    <lastmod>2018-12-30T12:35:10.513Z</lastmod>
+    <lastmod>2018-12-30T12:35:10.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/12/27/reading-plan-01-04/</loc>
     
-    <lastmod>2018-12-29T06:33:12.651Z</lastmod>
+    <lastmod>2018-12-29T06:33:12.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/12/24/reading-plan-01-03/</loc>
     
-    <lastmod>2018-12-24T14:38:26.604Z</lastmod>
+    <lastmod>2018-12-24T14:38:26.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/12/20/reading-plan-01-02/</loc>
     
-    <lastmod>2018-12-20T14:59:09.858Z</lastmod>
+    <lastmod>2018-12-20T14:59:09.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/12/19/reading-plan-01-01/</loc>
     
-    <lastmod>2018-12-19T14:23:36.052Z</lastmod>
+    <lastmod>2018-12-19T14:23:36.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/11/12/ollvm/</loc>
     
-    <lastmod>2018-11-12T13:05:27.207Z</lastmod>
+    <lastmod>2018-11-12T13:05:27.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/04/07/Creating-JVM-Language-Part-2/</loc>
     
-    <lastmod>2018-10-26T16:06:31.723Z</lastmod>
+    <lastmod>2018-10-26T16:06:31.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/11/Fix-TBS-magic-bug/</loc>
     
-    <lastmod>2018-10-26T15:44:59.617Z</lastmod>
+    <lastmod>2018-10-26T15:44:59.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/23/Creating-JVM-Language-Part-7/</loc>
     
-    <lastmod>2018-10-26T15:44:15.232Z</lastmod>
+    <lastmod>2018-10-26T15:44:15.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/05/01/Creating-JVM-Language-Part-3/</loc>
     
-    <lastmod>2018-10-26T15:43:35.051Z</lastmod>
+    <lastmod>2018-10-26T15:43:35.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-19/</loc>
     
-    <lastmod>2018-09-04T14:59:11.470Z</lastmod>
+    <lastmod>2018-09-04T14:59:11.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-20/</loc>
     
-    <lastmod>2018-09-04T14:57:50.656Z</lastmod>
+    <lastmod>2018-09-04T14:57:50.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-18/</loc>
     
-    <lastmod>2018-09-04T14:56:43.742Z</lastmod>
+    <lastmod>2018-09-04T14:56:43.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-17/</loc>
     
-    <lastmod>2018-09-04T14:56:13.291Z</lastmod>
+    <lastmod>2018-09-04T14:56:13.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-16/</loc>
     
-    <lastmod>2018-09-04T14:55:35.789Z</lastmod>
+    <lastmod>2018-09-04T14:55:35.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-15/</loc>
     
-    <lastmod>2018-09-04T14:54:54.478Z</lastmod>
+    <lastmod>2018-09-04T14:54:54.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-14/</loc>
     
-    <lastmod>2018-09-04T14:54:14.803Z</lastmod>
+    <lastmod>2018-09-04T14:54:14.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-13/</loc>
     
-    <lastmod>2018-09-04T14:53:33.176Z</lastmod>
+    <lastmod>2018-09-04T14:53:33.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-12/</loc>
     
-    <lastmod>2018-09-04T14:03:08.196Z</lastmod>
+    <lastmod>2018-09-04T14:03:08.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-11/</loc>
     
-    <lastmod>2018-09-04T07:43:26.617Z</lastmod>
+    <lastmod>2018-09-04T07:43:26.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/25/Creating-JVM-Language-Part-10/</loc>
     
-    <lastmod>2018-08-25T02:40:31.323Z</lastmod>
+    <lastmod>2018-08-25T02:40:31.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-9/</loc>
     
-    <lastmod>2018-08-24T09:09:59.394Z</lastmod>
+    <lastmod>2018-08-24T09:09:59.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-8/</loc>
     
-    <lastmod>2018-08-24T03:22:39.703Z</lastmod>
+    <lastmod>2018-08-24T03:22:39.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/07/28/jvm-classification/</loc>
     
-    <lastmod>2018-08-22T00:45:12.659Z</lastmod>
+    <lastmod>2018-08-22T00:45:12.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/07/29/sun-misc-unsafe/</loc>
     
-    <lastmod>2018-08-22T00:44:43.605Z</lastmod>
+    <lastmod>2018-08-22T00:44:43.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/22/Creating-JVM-Language-Part-6/</loc>
     
-    <lastmod>2018-08-22T00:44:12.066Z</lastmod>
+    <lastmod>2018-08-22T00:44:12.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/08/18/Creating-JVM-Language-Part-5/</loc>
     
-    <lastmod>2018-08-22T00:43:31.529Z</lastmod>
+    <lastmod>2018-08-22T00:43:31.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/06/10/Creating-JVM-Language-Part-4/</loc>
     
-    <lastmod>2018-08-22T00:43:30.095Z</lastmod>
+    <lastmod>2018-08-22T00:43:30.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/07/03/Install-Bochs-on-macOS-High-Sierra/</loc>
     
-    <lastmod>2018-07-03T08:06:00.594Z</lastmod>
+    <lastmod>2018-07-03T08:06:00.000Z</lastmod>
     
   </url>
   
@@ -263,77 +270,77 @@
   <url>
     <loc>https://blog.0xff000000.com/2018/04/11/Elm-guide-01/</loc>
     
-    <lastmod>2018-04-11T13:01:28.765Z</lastmod>
+    <lastmod>2018-04-11T13:01:28.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/04/09/Elm-guide/</loc>
     
-    <lastmod>2018-04-09T08:19:35.072Z</lastmod>
+    <lastmod>2018-04-09T08:19:35.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2018/04/06/Creating-JVM-Language-Part-1/</loc>
     
-    <lastmod>2018-04-06T16:16:29.417Z</lastmod>
+    <lastmod>2018-04-06T16:16:29.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2016/09/21/solid-go-design-2/</loc>
     
-    <lastmod>2018-04-02T10:17:40.860Z</lastmod>
+    <lastmod>2018-04-02T10:17:40.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2016/02/26/books-read-plan-2016/</loc>
     
-    <lastmod>2018-04-01T16:26:32.943Z</lastmod>
+    <lastmod>2018-04-01T16:26:32.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/about/index.html</loc>
     
-    <lastmod>2018-04-01T15:51:53.275Z</lastmod>
+    <lastmod>2018-04-01T15:51:53.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/2016/10/06/A-Tale-of-Two-Software-Engineers-and-Commitment/</loc>
     
-    <lastmod>2018-04-01T15:44:18.713Z</lastmod>
+    <lastmod>2018-04-01T15:44:18.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/categories/index.html</loc>
     
-    <lastmod>2018-04-01T13:07:36.245Z</lastmod>
+    <lastmod>2018-04-01T13:07:36.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/tags/index.html</loc>
     
-    <lastmod>2018-04-01T11:35:10.659Z</lastmod>
+    <lastmod>2018-04-01T11:35:10.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/search/index.html</loc>
     
-    <lastmod>2018-04-01T11:34:05.560Z</lastmod>
+    <lastmod>2018-04-01T11:34:05.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://blog.0xff000000.com/archives/index.html</loc>
     
-    <lastmod>2018-04-01T11:33:25.417Z</lastmod>
+    <lastmod>2018-04-01T11:33:25.000Z</lastmod>
     
   </url>
   
