@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="翻译,Enkel,JVM," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 10 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 10
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-08-25T03:00:00.000Z">
+        2018-08-25
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Enkel/">Enkel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/翻译/">翻译</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 10 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <blockquote>
+<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 10 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-10" target="_blank" rel="noopener">Github</a></p>
+<h2 id="1-语法规则更改"><a href="#1-语法规则更改" class="headerlink" title="1. 语法规则更改"></a>1. 语法规则更改</h2><p>实现条件语句需要对语法规则作如下两处改动：</p>
+<ul>
+<li>添加新规则 ifStatement</li>
+<li>添加 conditionalExpressions 表达式</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ifStatement :  &apos;if&apos;  &apos;(&apos;? expression &apos;)&apos;? trueStatement=statement (&apos;else&apos; falseStatement=statement)?;</span><br><span class="line">expression : varReference #VARREFERENCE</span><br><span class="line">           | value        #VALUE</span><br><span class="line">           //other expression alternatives</span><br><span class="line">           | expression cmp=&apos;&gt;&apos; expression #conditionalExpression</span><br><span class="line">           | expression cmp=&apos;&lt;&apos; expression #conditionalExpression</span><br><span class="line">           | expression cmp=&apos;==&apos; expression #conditionalExpression</span><br><span class="line">           | expression cmp=&apos;!=&apos; expression #conditionalExpression</span><br><span class="line">           | expression cmp=&apos;&gt;=&apos; expression #conditionalExpression</span><br><span class="line">           | expression cmp=&apos;&lt;=&apos; expression #conditionalExpression</span><br><span class="line">           ;</span><br></pre></td></tr></table></figure>
+<p>ifStatement 规则定义：</p>
+<ul>
+<li>expression 是一个真值表达式</li>
+<li>真值表达式放到括号里是非必要的，问号 ？意味着是可选的</li>
+<li>为 true 时 trueStatement 会被执行</li>
+<li>if 后面可以跟随者 else</li>
+<li>当 false 时 falseStatement 会被执行</li>
+<li>ifStatement 是语句，因此可以子在 trueStatement 或者 falseStatement 使用（形如 if … else if …else ）</li>
+</ul>
+<p>条件表达式的目的是比较两个表达式，并且返回另一个表达式（布尔值）。</p>
+<p>为了更好的理解 if 和 else 是如何被用来表示 else if，请看下面代码片段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if(0) &#123;</span><br><span class="line">        </span><br><span class="line">&#125; else if(1) &#123;</span><br><span class="line">        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AST 表示如下图所示：<br><img src="http://jakubdziworski.github.io/assets/media/enkel_10/if_parse.gif" alt=""></p>
+<p>如图所示，第二个 if 其实就是 else 的子语句。他们在不同的层级。因此没有必要指明 else if 规则。ifstatement 规则本质是一个语句，因此其他 ifStatements 可以嵌套用在 ifStatements。</p>
+<h2 id="2-匹配-Antlr-上下文对象"><a href="#2-匹配-Antlr-上下文对象" class="headerlink" title="2. 匹配 Antlr 上下文对象"></a>2. 匹配 Antlr 上下文对象</h2><p>Antlr 会生成 IfStatementContext 对象并转化成 POJO IfStatement 对象：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class StatementVisitor extends EnkelBaseVisitor&lt;Statement&gt; &#123;</span><br><span class="line">    //other stuff</span><br><span class="line">    @Override</span><br><span class="line">    public Statement visitIfStatement(@NotNull EnkelParser.IfStatementContext ctx) &#123;</span><br><span class="line">        ExpressionContext conditionalExpressionContext = ctx.expression();</span><br><span class="line">        Expression condition = conditionalExpressionContext.accept(expressionVisitor); //Map conditional expression</span><br><span class="line">        Statement trueStatement = ctx.trueStatement.accept(this); //Map trueStatement antlr object</span><br><span class="line">        Statement falseStatement = ctx.falseStatement.accept(this); //Map falseStatement antlr object</span><br><span class="line"></span><br><span class="line">        return new IfStatement(condition, trueStatement, falseStatement);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>条件表达式会被匹配成下面这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class ExpressionVisitor extends EnkelBaseVisitor&lt;Expression&gt; &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public ConditionalExpression visitConditionalExpression(@NotNull EnkelParser.ConditionalExpressionContext ctx) &#123;</span><br><span class="line">        EnkelParser.ExpressionContext leftExpressionCtx = ctx.expression(0); //get left side expression ( ex. 1 &lt; 5  -&gt; it would mean get &quot;1&quot;)</span><br><span class="line">        EnkelParser.ExpressionContext rightExpressionCtx = ctx.expression(1); //get right side expression</span><br><span class="line">        Expression leftExpression = leftExpressionCtx.accept(this); //get mapped (to POJO) left expression using this visitor</span><br><span class="line">        //rightExpression might be null! Example: &apos;if (x)&apos; checks x for nullity. The solution for this case is to assign integer 0 to the rightExpr </span><br><span class="line">        Expression rightExpression = rightExpressionCtx != null ? rightExpressionCtx.accept(this) : new Value(BultInType.INT,&quot;0&quot;); </span><br><span class="line">        CompareSign cmpSign = ctx.cmp != null ? CompareSign.fromString(ctx.cmp.getText()) : CompareSign.NOT_EQUAL; //if there is no cmp sign use &apos;!=0&apos; by default</span><br><span class="line">        return new ConditionalExpression(leftExpression, rightExpression, cmpSign);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CompareSign 是一个对象，表示比较符号（==，&lt; 等）。它保存了字节码指令（IF_ICMPEQ, IF_ICMPLE 等）。</p>
+<h2 id="3-生成字节码"><a href="#3-生成字节码" class="headerlink" title="3. 生成字节码"></a>3. 生成字节码</h2><p>JVM 中有一些指令来做分支判断：</p>
+<ul>
+<li>if&lt;eq,ne,lt,le,gt,ge&gt; - 操作数栈出栈，和 0 比较</li>
+<li>if_icmp_&lt;eq,ne,lt,le,gt,ge&gt; - 从栈上出栈两个值，比较是否相等</li>
+<li>if[non]null - 检查空值 </li>
+</ul>
+<p>本节中我们只是用第二个指令。 该指令的操作数是分支的偏移量（遇到 if 后，需要执行的指令）。</p>
+<h2 id="4-生成条件表达式"><a href="#4-生成条件表达式" class="headerlink" title="4. 生成条件表达式"></a>4. 生成条件表达式</h2><p>ifcmpne（比较两个值不相等）会在 ConditionalExpression 中首次被用到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public void generate(ConditionalExpression conditionalExpression) &#123;</span><br><span class="line">    Expression leftExpression = conditionalExpression.getLeftExpression();</span><br><span class="line">    Expression rightExpression = conditionalExpression.getRightExpression();</span><br><span class="line">    Type type = leftExpression.getType();</span><br><span class="line">    if(type != rightExpression.getType()) &#123;</span><br><span class="line">        throw new ComparisonBetweenDiferentTypesException(leftExpression, rightExpression); //not yet supported</span><br><span class="line">    &#125;</span><br><span class="line">    leftExpression.accept(this);</span><br><span class="line">    rightExpression.accept(this);</span><br><span class="line">    CompareSign compareSign = conditionalExpression.getCompareSign();</span><br><span class="line">    Label trueLabel = new Label(); //represents an adress in code (to which jump if condition is met)</span><br><span class="line">    Label endLabel = new Label();</span><br><span class="line">    methodVisitor.visitJumpInsn(compareSign.getOpcode(),trueLabel);</span><br><span class="line">    methodVisitor.visitInsn(Opcodes.ICONST_0);</span><br><span class="line">    methodVisitor.visitJumpInsn(Opcodes.GOTO, endLabel);</span><br><span class="line">    methodVisitor.visitLabel(trueLabel);</span><br><span class="line">    methodVisitor.visitInsn(Opcodes.ICONST_1);</span><br><span class="line">    methodVisitor.visitLabel(endLabel);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>compareSign.getOpcode()</code> 返回条件表达式的字节码指令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public enum CompareSign &#123;</span><br><span class="line">    EQUAL(&quot;==&quot;, Opcodes.IF_ICMPEQ),</span><br><span class="line">    NOT_EQUAL(&quot;!=&quot;, Opcodes.IF_ICMPNE),</span><br><span class="line">    LESS(&quot;&lt;&quot;,Opcodes.IF_ICMPLT),</span><br><span class="line">    GREATER(&quot;&gt;&quot;,Opcodes.IF_ICMPGT),</span><br><span class="line">    LESS_OR_EQUAL(&quot;&lt;=&quot;,Opcodes.IF_ICMPLE),</span><br><span class="line">    GRATER_OR_EQAL(&quot;&gt;=&quot;,Opcodes.IF_ICMPGE);</span><br><span class="line">    //getters</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>条件指令的操作数是分支的偏移量。<code>compareSign.getOpcode()</code> 从操作数栈上出栈两个值，比较。</p>
+<p>如果表达式是真，那么指令跳到 trueLabel 处继续执行。trueLabel 指令包含 <code>methodVisitor.visitInsn(Opcodes.ICONST_1);</code>，即把值 1 入栈。</p>
+<p>如果表达式假，不会发生指令跳转。接下来的指令是 ICONST_0， 把值 0 入栈。然后 GOTO （非分支指令）跳到 endLabel 处。这样，表达式为真的时候执行的语句块则会略过不执行。</p>
+<p>上述过程保证了真值表达式只可能是 1 或者 0（入栈的整数）。</p>
+<p>这样 conditonalExpression 可以用作表达式。可以赋值给变量，作为参数传递给函数，打印或者当做返回值。</p>
+<h2 id="5-生成-IfStatement"><a href="#5-生成-IfStatement" class="headerlink" title="5. 生成 IfStatement"></a>5. 生成 IfStatement</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public void generate(IfStatement ifStatement) &#123;</span><br><span class="line">        Expression condition = ifStatement.getCondition();</span><br><span class="line">        condition.accept(expressionGenrator);</span><br><span class="line">        Label trueLabel = new Label();</span><br><span class="line">        Label endLabel = new Label();</span><br><span class="line">        methodVisitor.visitJumpInsn(Opcodes.IFNE,trueLabel);</span><br><span class="line">        ifStatement.getFalseStatement().accept(this);</span><br><span class="line">        methodVisitor.visitJumpInsn(Opcodes.GOTO,endLabel);</span><br><span class="line">        methodVisitor.visitLabel(trueLabel);</span><br><span class="line">        ifStatement.getTrueStatement().accept(this);</span><br><span class="line">        methodVisitor.visitLabel(endLabel);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>IfStatement 依赖了 ConditionalExpression 用到的思想，它保证了最终会在入栈 0 或者 1。</p>
+<p>这样简化了对表达式的求值（<code>condition.accept(expressionGenrator);</code>）并且检查值是否入栈（<code>condition.accept(expressionGenrator);</code>）。如果不等于 0 ，跳到 trueLable 处执行(<code>ifStatement.getTrueStatement().accept(this);</code>), 否则继续执行 falseStatement, 并且跳到（GOTO）endLabel 处。</p>
+<h2 id="6-示例"><a href="#6-示例" class="headerlink" title="6. 示例"></a>6. 示例</h2><p>假设有如何 Enkel 代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">SumCalculator &#123;</span><br><span class="line"></span><br><span class="line">    main(string[] args) &#123;</span><br><span class="line">        var expected = 8</span><br><span class="line">        var actual = sum(3,5)</span><br><span class="line"></span><br><span class="line">        if( actual == expected ) &#123;</span><br><span class="line">            print &quot;test passed&quot;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            print &quot;test failed&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int sum (int x ,int y) &#123;</span><br><span class="line">        x+y</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成后的字节码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">$ javap -c  SumCalculator</span><br><span class="line">public class SumCalculator &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: bipush        8</span><br><span class="line">       2: istore_1          //store 8 in local variable 1 (expected)</span><br><span class="line">       3: bipush        3   //push 3 </span><br><span class="line">       5: bipush        5   //push 5</span><br><span class="line">       7: invokestatic  #10 //Call metod sum (5,3)</span><br><span class="line">      10: istore_2          //store the result in variable 2 (actual)</span><br><span class="line">      11: iload_2           //push the value from variable 2 (actual=8) onto the stack</span><br><span class="line">      12: iload_1           //push the value from variable 1 (expected=8) onto the stack</span><br><span class="line">      13: if_icmpeq     20  //compare two top values from stack (8 == 8) if false jump to label 20</span><br><span class="line">      16: iconst_0          //push 0 onto the stack</span><br><span class="line">      17: goto          21  //go to label 21 (skip true section)</span><br><span class="line">      20: iconst_1          //label 21 (true section) -&gt; push 1 onto the stack</span><br><span class="line">      21: ifne          35  //if the value on the stack (result of comparison 8==8 != 0 jump to label 35</span><br><span class="line">      24: getstatic     #16  // get static Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">      27: ldc           #18  // push String test failed</span><br><span class="line">      29: invokevirtual #23  // call print Method &quot;Ljava/io/PrintStream;&quot;.println:(Ljava/lang/String;)V</span><br><span class="line">      32: goto          43   //jump to end (skip true section)</span><br><span class="line">      35: getstatic     #16                 </span><br><span class="line">      38: ldc           #25  // String test passed</span><br><span class="line">      40: invokevirtual #23                 </span><br><span class="line">      43: return</span><br><span class="line"></span><br><span class="line">  public static int sum(int, int);</span><br><span class="line">    Code:</span><br><span class="line">       0: iload_0</span><br><span class="line">       1: iload_1</span><br><span class="line">       2: iadd</span><br><span class="line">       3: ireturn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#源码"><span class="toc-text">源码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-语法规则更改"><span class="toc-text">1. 语法规则更改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-匹配-Antlr-上下文对象"><span class="toc-text">2. 匹配 Antlr 上下文对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-生成字节码"><span class="toc-text">3. 生成字节码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-生成条件表达式"><span class="toc-text">4. 生成条件表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-生成-IfStatement"><span class="toc-text">5. 生成 IfStatement</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-示例"><span class="toc-text">6. 示例</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/08/24/Creating-JVM-Language-Part-9/" rel="next" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 9">
+          手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 9
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/09/04/Creating-JVM-Language-Part-11/" rel="prev" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 11">
+            手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 11
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/08/25/Creating-JVM-Language-Part-10/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>

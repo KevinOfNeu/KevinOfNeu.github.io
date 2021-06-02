@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="JavaScript,this,翻译," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>JavaScript 方法调用和 this 解析 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        JavaScript 方法调用和 this 解析
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-05-06T16:00:00.000Z">
+        2018-05-07
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/this/">this</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/翻译/">翻译</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 11 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <p><a href="http://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/" target="_blank" rel="noopener">原文地址</a></p>
+<p>一直以来，我对 JavaScript 的方法调用存有困惑。尤其是很多人一直抱怨，方法中的 <code>this</code> 语义含糊不清。</p>
+<p>在我看来，只要理解了方法调用原语就可以解开这些疑惑，其他所有的方法调用都可以认为是原语上的语法糖。事实上，ECMAScript 规范就是这么做的，这篇文章可以认为是简化版的规范说明，基本思路是一样的。</p>
+<a id="more"></a>
+<h2 id="原语"><a href="#原语" class="headerlink" title="原语"></a>原语</h2><p>方法调用的原语是 <code>call</code> 这个方法：</p>
+<ol>
+<li>接受一个参数列表 <code>argList</code></li>
+<li>第一个参数是 <code>thisValue</code></li>
+<li>触发函数调用，设置 <code>thisValue</code> 为 <code>this</code>, 剩余的参数作参数列表</li>
+</ol>
+<p>举例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hello</span>(<span class="params">thing</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="keyword">this</span> + <span class="string">" says hello "</span> + thing);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">hello.call(<span class="string">"Yehuda"</span>, <span class="string">"world"</span>) <span class="comment">//=&gt; Yehuda says hello world</span></span><br></pre></td></tr></table></figure>
+<p>你会发现，<code>this</code> 的值被设置为 <code>Yehuda</code>, 只有一个参数 <code>thing</code> 被设置为 “world” 。这就是 JavaScript 的方法调用原语。可以认为其他的方法调用都是这种形式的语法糖。</p>
+<p><em>注</em>：在 <a href="http://es5.github.com/#x15.3.4.4" target="_blank" rel="noopener">ES5规范</a> 中，<code>call</code> 被当做更底层的原语，但是仅仅是一层比较浅的封装，因此这里做了简化。</p>
+<h2 id="简单的方法调用"><a href="#简单的方法调用" class="headerlink" title="简单的方法调用"></a>简单的方法调用</h2><p>如果一直使用 <code>call</code> 来做函数调用，会显得很麻烦，因此 JavaScript 允许我们使用 <code>hello(&quot;world&quot;)</code> 这种语法去做函数调用，JavaScript 会帮我们去糖：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hello</span>(<span class="params">thing</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"Hello "</span> + thing);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// this:</span></span><br><span class="line">hello(<span class="string">"world"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// desugars to:</span></span><br><span class="line">hello.call(<span class="built_in">window</span>, <span class="string">"world"</span>);</span><br></pre></td></tr></table></figure>
+<p>在 ECMAScript 5 中，如果使用 <code>strict mode</code>，行为会有所改变：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// this:</span></span><br><span class="line">hello(<span class="string">"world"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// desugars to:</span></span><br><span class="line">hello.call(<span class="literal">undefined</span>, <span class="string">"world"</span>);</span><br></pre></td></tr></table></figure>
+<p>更简短的描述可以认为 <code>fn(...args)</code> 和 <code>fn.call(window [ES5-strict: undefined], ...args)</code> 的调用是一样的。</p>
+<p>内部函数的声明也是这样，诸如 <code>(function() {})()</code> 的函数声明和 <code>(function() {}).call(window [ES5-strict: undefined)</code> 也相同。</p>
+<p><em>注</em>：事实上，这里有一点不是很准确，ECMAScript 5 规范中声明了 <code>undefined</code> 一定会被传递，但是当方法在非严格模式中被调用的时候，应该把 <code>thisValue</code> 的值设置为全局变量，这可以让严格模式下的调用者避免破坏已存在的非严格模式的库。</p>
+<h2 id="成员方法"><a href="#成员方法" class="headerlink" title="成员方法"></a>成员方法</h2><p>另一种常见的函数调用形式就是作为成员函数被调用，<code>person.hello()</code>。这种情景下，函数调用会变成如下形式：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = &#123;</span><br><span class="line">  name: <span class="string">"Brendan Eich"</span>,</span><br><span class="line">  hello: <span class="function"><span class="keyword">function</span>(<span class="params">thing</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span> + <span class="string">" says hello "</span> + thing);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// this:</span></span><br><span class="line">person.hello(<span class="string">"world"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// desugars to this:</span></span><br><span class="line">person.hello.call(person, <span class="string">"world"</span>);</span><br></pre></td></tr></table></figure>
+<p>请注意，<code>hello</code> 函数作为谁的成员并不重要，我们生命 <code>hello</code> 为单独的函数，下面看一下如何动态绑定对象：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hello</span>(<span class="params">thing</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="keyword">this</span> + <span class="string">" says hello "</span> + thing);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">person = &#123; <span class="attr">name</span>: <span class="string">"Brendan Eich"</span> &#125;</span><br><span class="line">person.hello = hello;</span><br><span class="line"></span><br><span class="line">person.hello(<span class="string">"world"</span>) <span class="comment">// still desugars to person.hello.call(person, "world")</span></span><br><span class="line"></span><br><span class="line">hello(<span class="string">"world"</span>) <span class="comment">// "[object DOMWindow]world"</span></span><br></pre></td></tr></table></figure>
+<p>注意，<code>hello</code> 并不会一直持有 <code>this</code> 的绑定，他总是根据调用者的调用形式，在调用的时候动态设定的。</p>
+<h2 id="使用-Function-prototype-bind"><a href="#使用-Function-prototype-bind" class="headerlink" title="使用 Function.prototype.bind"></a>使用 <code>Function.prototype.bind</code></h2><p>有时候绑定 <code>this</code> 为固定值是非常常见和方便的，因此有些时候人们会利用闭包来实现 <code>this</code> 值的绑定。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = &#123;</span><br><span class="line">  name: <span class="string">"Brendan Eich"</span>,</span><br><span class="line">  hello: <span class="function"><span class="keyword">function</span>(<span class="params">thing</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name + <span class="string">" says hello "</span> + thing);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> boundHello = <span class="function"><span class="keyword">function</span>(<span class="params">thing</span>) </span>&#123; <span class="keyword">return</span> person.hello.call(person, thing); &#125;</span><br><span class="line"></span><br><span class="line">boundHello(<span class="string">"world"</span>);</span><br></pre></td></tr></table></figure>
+<p>尽管 <code>boundHello</code> 仍然被去糖，变成 <code>boundHello.call(window, &quot;world&quot;)</code> 形式的调用，我们曲线救国，重新绑定了 <code>this</code> 的值为我们想要绑定的对象。</p>
+<p>我们可以微调一下，让这种调用更通用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> bind = <span class="function"><span class="keyword">function</span>(<span class="params">func, thisValue</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> func.apply(thisValue, <span class="built_in">arguments</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> boundHello = bind(person.hello, person);</span><br><span class="line">boundHello(<span class="string">"world"</span>) <span class="comment">// "Brendan Eich says hello world"</span></span><br></pre></td></tr></table></figure>
+<p>为了理解这种调用，需要注意两点：</p>
+<ol>
+<li><code>arguments</code> 是一个数组，代表了函数调用的所有参数</li>
+<li><code>apply</code> 和 <code>call</code> 基本一致，除了他接受的参数是数组形式，而不是需要一个个的列举出来</li>
+</ol>
+<p><code>bind</code> 函数返回了一个新的函数。当函数被调用的时候，<code>bind</code> 仅仅是触发了参数中传递进来的函数，<code>this</code> 的值也是通过第二个参数重新绑定。</p>
+<p>既然这种形式得到大家的共识，因此 ES5 在 <code>Function</code> 对象上添加了 <code>bind</code> 函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> boundHello = person.hello.bind(person);</span><br><span class="line">boundHello(<span class="string">"world"</span>) <span class="comment">// "Brendan Eich says hello world"</span></span><br></pre></td></tr></table></figure>
+<p>当把一个纯函数作为 callback 传递的时候是非常有用的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = &#123;</span><br><span class="line">  name: <span class="string">"Alex Russell"</span>,</span><br><span class="line">  hello: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="built_in">console</span>.log(<span class="keyword">this</span>.name + <span class="string">" says hello world"</span>); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$(<span class="string">"#some-div"</span>).click(person.hello.bind(person));</span><br><span class="line"></span><br><span class="line"><span class="comment">// when the div is clicked, "Alex Russell says hello world" is printed</span></span><br></pre></td></tr></table></figure>
+<p>这种形式并不优雅，因此 TC39（一个委员会致力于下一代 ECMAScript 的标准）一直在研究一种方案，技能向前兼容，又足够优雅。</p>
+<h2 id="jQuery"><a href="#jQuery" class="headerlink" title="jQuery"></a>jQuery</h2><p>jQuery 大量使用了匿名回调，内部调用了 <code>call</code> 来设置 callback 的 <code>this</code> 为更有用的值。例如，jQuery 触发 callback 的时候把设置了事件监听的元素作为 <code>this</code> 的值，而不是不经过处理，直接把 <code>window</code> 作为 <code>this</code> 的值。</p>
+<p>这非常有用，因为匿名回调函数里的默认 <code>this</code> 的值通常并没有什么用，对于 JavaScript 的初学者来说，<code>this</code> 的值经常容易造成困难并且很难解释清楚。</p>
+<p>如果你掌握了把方法调用去糖为 <code>func.call(thisValue, ...args)</code> 的基本法则，你将会如鱼得水。</p>
+<h2 id="PS-偷梁换柱"><a href="#PS-偷梁换柱" class="headerlink" title="PS: 偷梁换柱"></a>PS: 偷梁换柱</h2><p>在一些地方，我简化了 JavaScript 规范中的繁文缛节。比如，我把 <code>func.call</code> 称作原语。实际上，规范中, 对于 <code>func.call</code> 和 <code>[obj.]func()</code> 有原语的概念（<code>[[Call]]</code>）。</p>
+<p>然而，我们可以看一下 <code>func.call</code> 的定义：</p>
+<ol>
+<li>如果 <code>IsCallable(func)</code> 为 false, 抛出 <code>TypeError</code> 异常</li>
+<li><code>argList</code> 设置为空列表</li>
+<li>如果方法被调用的参数多余一个，从 <code>arg1</code> 开始，从左至右的顺序组成 <code>argList</code></li>
+<li>返回 func 内部的 <code>[[Call]]</code> 的调用结果，把 <code>thisArg</code> 作为 <code>this</code> 的值，<code>argList</code> 作为参数列表</li>
+</ol>
+<p>显而易见，这个定义其实就是 JavaScript 对原语 <code>[[Call]]</code> 的绑定。</p>
+<p>如果你浏览一下函数触发的定义，前面几步是设置 <code>thisValue</code> 和 <code>argList</code>, 最后一步是返回 func 内部的 <code>[[Call]]</code> 的调用结果，把 <code>thisArg</code> 作为 <code>this</code> 的值，<code>argList</code> 作为参数列表。</p>
+<p>一旦 <code>thisValue</code> 和 <code>argList</code> 确定下来，含义都是一样的。</p>
+<p>我把 <code>call</code> 称作原语其实是偷梁换柱，正如前面所讲，这和规范中的描述其实都是一致的。</p>
+<p>PS：有一些情况我并没有覆盖到，比如使用 <code>with</code> 关键字的情况。</p>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#原语"><span class="toc-text">原语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单的方法调用"><span class="toc-text">简单的方法调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#成员方法"><span class="toc-text">成员方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-Function-prototype-bind"><span class="toc-text">使用 Function.prototype.bind</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jQuery"><span class="toc-text">jQuery</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PS-偷梁换柱"><span class="toc-text">PS: 偷梁换柱</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/05/01/Creating-JVM-Language-Part-3/" rel="next" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 3">
+          手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 3
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/06/10/Creating-JVM-Language-Part-4/" rel="prev" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 4">
+            手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 4
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/05/07/Context-of-JavaScript-Calling/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>

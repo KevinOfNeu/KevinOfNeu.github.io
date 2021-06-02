@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="计划,阅读,100 天," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>100 天阅读计划，计算机的本质：深入剖析程序和计算机 - 程序的含义 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        100 天阅读计划，计算机的本质：深入剖析程序和计算机 - 程序的含义
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-12-20T14:38:00.000Z">
+        2018-12-20
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/100-天/">100 天</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/计划/">计划</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/阅读/">阅读</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 11 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <p>100 天计划第一期，决定读一些经典的技术类书籍。作为 IT 从业者，虽然是科班出身，但是基础知识结构仍然有很多需要夯实。</p>
+<p>《计算机的本质：深入剖析程序和计算机》这本书涵盖了计算理论和编程语言设计，阐释了形式语义、自动机理论，以及通过 lambda 演算进行函数式编程等计算问题，可以帮助更好的理解计算机科学和计算原理。</p>
+<a id="more"></a>
+<p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-19-132932.png" alt="drawing" width="250"></p>
+<p>本文主要是阅读过程中的一些摘录和整理。</p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><p>传统的计算机程序是长长的字符串。每一种编程语言都有一系列规则，描述在那种语言中什么样的字符串被认为是有效程序。这些规则定义了这种语言的语法。</p>
+<p>语法关心的只是程序的表面是什么样的，而不是它的含义。程序有可能语法正确但没有任何实际意义。例如，程序 y = x + 1 本身可能没有任何意义，因为并没有事先说明 x 是什么，而程序 z = true + 1 可能会在运行时候报错，因为它试图在一个布尔型值上加数字。<br>（当然，这依赖于具体编程语言的其他属性。 ）</p>
+<h2 id="操作语义"><a href="#操作语义" class="headerlink" title="操作语义"></a>操作语义</h2><p>操作语义学（operational semantic）的基础，这种方法为程序在某种机器上的执行定义一些规则，以此来捕捉编程语言的含义。这个机器常常是一种抽象的机器：为了解释这种语言所写的程序如何执行而设计出来的一个想象的、理想化的计算机。为了更好地捕获编程语言的运行时行为，通常需要针对不同种类的编程语言设计不同的抽象机器。</p>
+<h3 id="小步语义"><a href="#小步语义" class="headerlink" title="小步语义"></a>小步语义</h3><p>假想一台机器，用这台机器直接按照这种语言的语法进行操作一小步一小步地对其进行反复规约，从而对一个程序求值。不管最后得到的结果含义是什么，我们每一步都能让程序更接近最终结果。</p>
+<p>这种小步规约类似于对代数式求值的方式。</p>
+<p>例如，为了对 (1×2) + (3×4) 求值，我们知道应该：(1) 执行左侧的乘法（1×2 变成了 2） ，这样表达式就规约成了 2 + (3×4)；(2) 执行右侧的乘法（3×4 变成了 12） ，这样表达式规约成了 2 + 12；(3) 执行加法（2 + 12 变成了 14） ，最终得到 14。</p>
+<h3 id="大步语义"><a href="#大步语义" class="headerlink" title="大步语义"></a>大步语义</h3><p>大步语义的思想是，定义如何从一个表达式或者语句直接得到它的结果。这必然需要把程序的执行当成一个递归的而不是迭代的过程：大步语义说的是，为了对一个更大的表达式求值，我们要对所有比它小的子表达式求值，然后把结果结合起来得到最终答案。</p>
+<p>大步语义经常会写成更为松散的形式，只会说哪些子计算会执行，而不会指明它们按什么顺序执行。</p>
+<h2 id="指称语义"><a href="#指称语义" class="headerlink" title="指称语义"></a>指称语义</h2><p>指称语义（denotational semantic）关心从程序本来的语言到其他表示的转换。</p>
+<p>指称语义确实是一种比操作语义更抽象的方法，因为它只是用一种语言替换另一种语言，而不是把一种语言转换成真实的行为。</p>
+<h2 id="形式化语义"><a href="#形式化语义" class="headerlink" title="形式化语义"></a>形式化语义</h2><p>形式化的语义通常都是由数学化的工具完成的。</p>
+<p>形式化语义的一个重要应用是为一种编程语言的含义给出一个无歧义的定义，而不是让其依赖于像自然语言规范文档和“由实现规范”这样更加随意的方法。形式化的定义还有其他用途，例如证明某种语言通常情况下的特性，以及特定程序在特定情况下的特性，证明语言中程序之间的等价性，研究如何在不改变程序行为的情况下安全地变换程序而使其效率更高。</p>
+<p>例如，既然操作语义与解释器的实现极为接近，那么计算机科学家就可以把一个适当的解释器看成一种语言的操作语义，然后证明它在那种语言的指称语义方面的正确性——这意味着证明了由解释器给出的含义和由指称语义给出的含义之间存在着明显的联系。</p>
+<p>指称语义的一个优点是比操作语义抽象层次更高，它忽略了程序如何执行的细节，而只关心如何把它转换成一个不同的表示。例如，如果存在一种指称语义可以把两种语言翻译成某种共通的表示，就使对不同语言写成的两个程序进行比较成为可能。</p>
+<p>抽象程度会使指称语义看起来有点兜圈子。如果问题是如何解释一种程序设计语言的含义，那么把一种语言翻译成另一种语言是如何让我们更接近问题答案的呢？一个指称只不过与它的含义一样好；尤其是，如果指称的语言有某种操作性的含义，那么一个指称语义只是让我们更接近于能实际执行一个程序，这个语言的语义本身展示了它是如何执行的，而不是如何翻译成另一种语言的。</p>
+<p>形式化的指称语义使用抽象的数学对象（通常是函数）来表示表达式和语句这样的编程语言结构，并且因为数学上的约定会规定如何对函数求值这样的事情，这就有了一种直接在操作意义上思考指称的方式。我们已经使用了不太正式的方式，把指称语义看成是一种语言到另一种语言的编译器，而事实上这是多数编程语言最终得以执行的方式：一个 Java 程序将会由 javac 编译成字节码，字节码将会被 java 的虚拟机即时编译成 x86 的指令，然后一个 CPU 会把每一条 x86 指令解码成类 RISC（精简指令集）的微指令放到一个核上去执行</p>
+<h2 id="treetop"><a href="#treetop" class="headerlink" title="treetop"></a>treetop</h2><p><a href="https://github.com/nathansobo/treetop" target="_blank" rel="noopener">treetop</a> 是本书中推荐的一个 ruby 的语法解释器。</p>
+<h2 id="尾巴"><a href="#尾巴" class="headerlink" title="尾巴"></a>尾巴</h2><p>偷偷的放一下本书的资源吧，<a href="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/pdf/%E8%AE%A1%E7%AE%97%E7%9A%84%E6%9C%AC%E8%B4%A8%EF%BC%9A%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90%E7%A8%8B%E5%BA%8F%E5%92%8C%E8%AE%A1%E7%AE%97%E6%9C%BA.pdf" target="_blank" rel="noopener">点我下载</a>, 侵权删。</p>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#语法"><span class="toc-text">语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#操作语义"><span class="toc-text">操作语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#小步语义"><span class="toc-text">小步语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#大步语义"><span class="toc-text">大步语义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#指称语义"><span class="toc-text">指称语义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#形式化语义"><span class="toc-text">形式化语义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#treetop"><span class="toc-text">treetop</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#尾巴"><span class="toc-text">尾巴</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/12/19/reading-plan-01-01/" rel="next" title="100 天阅读计划，第一期">
+          100 天阅读计划，第一期
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/12/24/reading-plan-01-03/" rel="prev" title="100 天阅读计划，深入剖析程序和计算机 - 确定性有限自动机（Deterministic Finite Automaton，DFA）">
+            100 天阅读计划，深入剖析程序和计算机 - 确定性有限自动机（Deterministic Finite Automaton，DFA）
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/12/20/reading-plan-01-02/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>

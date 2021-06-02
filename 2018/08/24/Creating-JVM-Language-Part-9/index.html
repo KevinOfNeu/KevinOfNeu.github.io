@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="翻译,Enkel,JVM," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 9 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 9
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-08-24T09:00:00.000Z">
+        2018-08-24
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Enkel/">Enkel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/翻译/">翻译</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 7 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <blockquote>
+<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 9 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-9" target="_blank" rel="noopener">Github</a></p>
+<h2 id="1-语法规则改动"><a href="#1-语法规则改动" class="headerlink" title="1. 语法规则改动"></a>1. 语法规则改动</h2><p>我们新建一个规则 “returnStatement”。<br>那为什么不叫 “returnExpression” 呢？毕竟表达式总是返回值的，语句没有返回值么?<br>这听起来有点绕口，但是返回值并不总是返回一个值。在 Java 中，代码 <code>int x = return 5;</code> 没有意义， 在 Enkel 中也是如此。换句话说，表达式总可以给一个变量赋值。这就是为什么返回是语句，而不是表达式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">statement : variableDeclaration</span><br><span class="line">           //other statements rules</span><br><span class="line">           | returnStatement ;</span><br><span class="line"></span><br><span class="line">variableDeclaration : VARIABLE name EQUALS expression;</span><br><span class="line">printStatement : PRINT expression ;</span><br><span class="line">returnStatement : &apos;return&apos; #RETURNVOID</span><br><span class="line">                | (&apos;return&apos;)? expression #RETURNWITHVALUE;</span><br></pre></td></tr></table></figure>
+<p>返回语句有两种形式：</p>
+<ul>
+<li>RETURNVOID - 用在没有返回值的方法中。return 关键字是必须的，后面不需要表达式</li>
+<li>RETURNWITHVALUE - 用在有返回值的方法中。return 关键字不是必须的，但是需要一个表达式</li>
+</ul>
+<p>因此，方法可以显示或者隐士的返回一个值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SomeClass &#123;</span><br><span class="line">    fun1 &#123;</span><br><span class="line">       return  //explicitly return from void method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    fun2 &#123;</span><br><span class="line">        //implicitly return from void method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int fun2 &#123;</span><br><span class="line">        return 1  //explicitly return &quot;1&quot; from int method</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int fun3 &#123;</span><br><span class="line">        1  //implicitly return &quot;1&quot; from int method</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码经过解析后，AST 图形展示如下：<br><img src="http://jakubdziworski.github.io/assets/media/enkel_9/parse_tree.gif" alt=""></p>
+<p>我们可以看到，AST 中并没有处理 fun2 中的隐士返回值。这是因为方法是空的语句块，匹配空的语句块作为返回值并不是一个好的想法。因此，确实的返回语句会在字节码生成阶段手动添加。</p>
+<h2 id="2-匹配-Antlr-上下文对象"><a href="#2-匹配-Antlr-上下文对象" class="headerlink" title="2. 匹配 Antlr 上下文对象"></a>2. 匹配 Antlr 上下文对象</h2><p>经过解析后，返回语句从 antlr 的上下文对象转换成 POJO 类 <code>ReturnStatement</code> 。这一步的目的是仅匹配字节码生成需要的数据，而不是直接从 antlr 生成的对象中取数据，这样会让代码看起来很丑陋。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class StatementVisitor extends EnkelBaseVisitor&lt;Statement&gt; &#123;</span><br><span class="line"></span><br><span class="line">    //other stuff</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public Statement visitRETURNVOID(@NotNull EnkelParser.RETURNVOIDContext ctx) &#123;</span><br><span class="line">        return new ReturnStatement(new EmptyExpression(BultInType.VOID));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public Statement visitRETURNWITHVALUE(@NotNull EnkelParser.RETURNWITHVALUEContext ctx) &#123;</span><br><span class="line">        Expression expression = ctx.expression().accept(expressionVisitor); </span><br><span class="line">        return new ReturnStatement(expression);</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-检测隐士空返回"><a href="#3-检测隐士空返回" class="headerlink" title="3. 检测隐士空返回"></a>3. 检测隐士空返回</h2><p>假设方法中包含有隐士返回，在解析阶段是不会生成返回语句的，这就是为什么我们需要检测这种情景，并且在字节码生成阶段手动添加返回语句。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class MethodGenerator &#123;</span><br><span class="line">    //other stuff</span><br><span class="line">    private void appendReturnIfNotExists(Function function, Block block,StatementGenerator statementScopeGenrator) &#123;</span><br><span class="line">        Statement lastStatement = block.getStatements().get(block.getStatements().size() - 1);</span><br><span class="line">        boolean isLastStatementReturn = lastStatement instanceof ReturnStatement;</span><br><span class="line">        if(!isLastStatementReturn) &#123;</span><br><span class="line">            EmptyExpression emptyExpression = new EmptyExpression(function.getReturnType());</span><br><span class="line">            ReturnStatement returnStatement = new ReturnStatement(emptyExpression);</span><br><span class="line">            returnStatement.accept(statementScopeGenrator);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述方法检测方法最后的语句是不是返回语句，如果不是就添加返回指令。</p>
+<h2 id="4-生成字节码"><a href="#4-生成字节码" class="headerlink" title="4. 生成字节码"></a>4. 生成字节码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class StatementGenerator &#123;</span><br><span class="line">    //oher stuff</span><br><span class="line">    public void generate(ReturnStatement returnStatement) &#123;</span><br><span class="line">        Expression expression = returnStatement.getExpression();</span><br><span class="line">        Type type = expression.getType();</span><br><span class="line">        expression.accept(expressionGenrator); //generate bytecode for expression itself (puts the value of expression onto the stack)</span><br><span class="line">        if(type == BultInType.VOID) &#123;</span><br><span class="line">            methodVisitor.visitInsn(Opcodes.RETURN);</span><br><span class="line">        &#125; else if (type == BultInType.INT) &#123;</span><br><span class="line">            methodVisitor.visitInsn(Opcodes.IRETURN);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因此，<code>return 5</code> 会经过如下阶段：</p>
+<ul>
+<li>从返回语句中获得表达式（这里是5，类型是值）</li>
+<li>生成 5 对应的字节码。（expression.accept(expressionGenerator) 调用 ExpressionGenerator.generate(Value value)）</li>
+<li>字节码生成阶段，会生成一个新的值 5 并压入操作数栈</li>
+<li>IRETURN 指令将操作数栈栈顶数据出栈，并返回</li>
+</ul>
+<p>字节码表示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bipush        5</span><br><span class="line">ireturn</span><br></pre></td></tr></table></figure></p>
+<h2 id="5-示例"><a href="#5-示例" class="headerlink" title="5. 示例"></a>5. 示例</h2><p>假设我们又如下 Enkel 代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SumCalculator &#123;</span><br><span class="line"></span><br><span class="line">    void main(string[] args) &#123;</span><br><span class="line">        print sum(5,2)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    int sum (int x ,int y) &#123;</span><br><span class="line">        x+y</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>生成的字节码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ javap -c  SumCalculator</span><br><span class="line">public class SumCalculator &#123;</span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #12                 //get static field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: bipush        5</span><br><span class="line">       5: bipush        2</span><br><span class="line">       7: invokestatic  #16                 // call method sum (with the values on operand stack 5,2)</span><br><span class="line">      10: invokevirtual #21                 // call method println (with the value on stack - the result of method sum)</span><br><span class="line">      13: return                           //return</span><br><span class="line"></span><br><span class="line">  public static int sum(int, int);</span><br><span class="line">    Code:</span><br><span class="line">       0: iload_0</span><br><span class="line">       1: iload_1</span><br><span class="line">       2: iadd</span><br><span class="line">       3: ireturn //return the value from operand stack (result of iadd)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#源码"><span class="toc-text">源码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-语法规则改动"><span class="toc-text">1. 语法规则改动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-匹配-Antlr-上下文对象"><span class="toc-text">2. 匹配 Antlr 上下文对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-检测隐士空返回"><span class="toc-text">3. 检测隐士空返回</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-生成字节码"><span class="toc-text">4. 生成字节码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-示例"><span class="toc-text">5. 示例</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/08/24/Creating-JVM-Language-Part-8/" rel="next" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 8">
+          手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 8
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/08/25/Creating-JVM-Language-Part-10/" rel="prev" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 10">
+            手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 10
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/08/24/Creating-JVM-Language-Part-9/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>

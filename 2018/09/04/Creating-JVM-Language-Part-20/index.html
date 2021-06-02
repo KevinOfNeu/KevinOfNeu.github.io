@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="翻译,Enkel,JVM," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 20 [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 20
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-09-04T14:20:00.000Z">
+        2018-09-04
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Enkel/">Enkel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/翻译/">翻译</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 5 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <blockquote>
+<p>本文系 <a href="http://jakubdziworski.github.io/enkel/2016/03/10/enkel_first.html" target="_blank" rel="noopener">Creating JVM language</a> 翻译的第 20 篇。<br>原文中的代码和原文有不一致的地方均在新的<a href="https://github.com/KevinOfNeu/Enkel" target="_blank" rel="noopener">代码仓库</a>中更正过，建议参考新的代码仓库。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p> <a href="https://github.com/KevinOfNeu/Enkel/tree/PART-20" target="_blank" rel="noopener">Github</a></p>
+<h2 id="扑克牌洗牌模拟器"><a href="#扑克牌洗牌模拟器" class="headerlink" title="扑克牌洗牌模拟器"></a>扑克牌洗牌模拟器</h2><p>在之前的 19 篇博客中，我把实现编程语言的每一步都详细的记录下来了。如果不拿这门语言，练练手，做个东西玩，那就没什么意思了，对不？</p>
+<p>我准备实现一个扑克牌的洗牌模拟器。思路是提供一定数量的玩家，指定每个玩家的扑克牌的数量。作为输出，每个玩家都能获得一定数量的随机扑克牌。</p>
+<h3 id="Card-类"><a href="#Card-类" class="headerlink" title="Card 类"></a>Card 类</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Card &#123;</span><br><span class="line"></span><br><span class="line">    string color</span><br><span class="line">    string pattern</span><br><span class="line"></span><br><span class="line">    Card(string cardColor,string cardPattern) &#123;</span><br><span class="line">        color = cardColor</span><br><span class="line">        pattern = cardPattern</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    string getColor() &#123;</span><br><span class="line">        color</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    string getPattern() &#123;</span><br><span class="line">        pattern</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    string toString() &#123;</span><br><span class="line">        return &quot;&#123;&quot; + color + &quot;,&quot; + pattern + &quot;&#125;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>没有黑科技，就是一个对象，并且是不可变的。</p>
+<h3 id="CardDrawer-类"><a href="#CardDrawer-类" class="headerlink" title="CardDrawer 类"></a>CardDrawer 类</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">CardDrawer &#123;</span><br><span class="line">    start &#123;</span><br><span class="line">        var cards = new List() //creates java.util.ArrayList </span><br><span class="line">        addNumberedCards(cards) //calling method with 3 arguments (last 2 are default)</span><br><span class="line">        addCardWithAllColors(&quot;Ace&quot;,cards) </span><br><span class="line">        addCardWithAllColors(&quot;Queen&quot;,cards)</span><br><span class="line">        addCardWithAllColors(&quot;King&quot;,cards)</span><br><span class="line">        addCardWithAllColors(&quot;Jack&quot;,cards)</span><br><span class="line">        //Calling with named arguments (and in differnet order)</span><br><span class="line">        //The last parameter (cardsPerPlayer) is ommited (it&apos;s default value is 5)</span><br><span class="line">        drawCardsForPlayers(playersAmount -&gt; 5,cardsList -&gt; cards) </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    addNumberedCards(List cardsList,int first=2, int last=10) &#123;</span><br><span class="line">        for i from first to last &#123;  //loop from first to last (inclusive)</span><br><span class="line">            var numberString = new java.lang.Integer(i).toString()</span><br><span class="line">            addCardWithAllColors(numberString,cardsList)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    addCardWithAllColors(string pattern,List cardsList) &#123;</span><br><span class="line">        cardsList.add(new Card(&quot;Clubs&quot;,pattern))</span><br><span class="line">        cardsList.add(new Card(&quot;Diamonds&quot;,pattern))</span><br><span class="line">        cardsList.add(new Card(&quot;Hearts&quot;,pattern))</span><br><span class="line">        cardsList.add(new Card(&quot;Spades&quot;,pattern))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    drawCardsForPlayers(List cardsList,int playersAmount = 3,int cardsPerPlayer = 5) &#123;</span><br><span class="line">        if(cardsList.size() &lt; (playersAmount * cardsPerPlayer)) &#123;</span><br><span class="line">            print &quot;ERROR - Not enough cards&quot; //No exceptions yet :)</span><br><span class="line">            return</span><br><span class="line">        &#125;</span><br><span class="line">        var random = new java.util.Random()</span><br><span class="line">        for i from 1 to playersAmount &#123;</span><br><span class="line">            var playernumberString = new java.lang.Integer(i).toString()</span><br><span class="line">            print &quot;player &quot; + playernumberString  + &quot; is drawing:&quot;</span><br><span class="line">            for j from 1 to cardsPerPlayer &#123;</span><br><span class="line">                var dawnCardIndex = random.nextInt(cardsList.size() - 1)</span><br><span class="line">                var drawedCard = cardsList.remove(dawnCardIndex)</span><br><span class="line">                print &quot;    drawed:&quot; + drawedCard</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><p>首先我们需要编译 Card 类。然后编译 CardDrawer 类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">java -classpath compiler/target/compiler-1.0-SNAPSHOT-jar-with-dependencies.jar: com.kubadziworski.compiler.Compiler EnkelExamples/RealApp/Card.enk</span><br><span class="line">java -classpath compiler/target/compiler-1.0-SNAPSHOT-jar-with-dependencies.jar:. com.kubadziworski.compiler.Compiler EnkelExamples/RealApp/CardDrawer.enk</span><br><span class="line"></span><br><span class="line">kuba@kuba-laptop:~/repos/Enkel-JVM-language$ java CardDrawer </span><br><span class="line">player 1 is drawing:</span><br><span class="line">    drawed:&#123;Diamonds,Queen&#125;</span><br><span class="line">    drawed:&#123;Spades,7&#125;</span><br><span class="line">    drawed:&#123;Hearts,Jack&#125;</span><br><span class="line">    drawed:&#123;Spades,4&#125;</span><br><span class="line">    drawed:&#123;Hearts,2&#125;</span><br><span class="line">player 2 is drawing:</span><br><span class="line">    drawed:&#123;Diamonds,4&#125;</span><br><span class="line">    drawed:&#123;Hearts,Ace&#125;</span><br><span class="line">    drawed:&#123;Diamonds,Jack&#125;</span><br><span class="line">    drawed:&#123;Spades,Queen&#125;</span><br><span class="line">    drawed:&#123;Spades,King&#125;</span><br><span class="line">player 3 is drawing:</span><br><span class="line">    drawed:&#123;Diamonds,Ace&#125;</span><br><span class="line">    drawed:&#123;Clubs,2&#125;</span><br><span class="line">    drawed:&#123;Clubs,3&#125;</span><br><span class="line">    drawed:&#123;Spades,8&#125;</span><br><span class="line">    drawed:&#123;Clubs,7&#125;</span><br><span class="line">player 4 is drawing:</span><br><span class="line">    drawed:&#123;Spades,Ace&#125;</span><br><span class="line">    drawed:&#123;Diamonds,3&#125;</span><br><span class="line">    drawed:&#123;Clubs,4&#125;</span><br><span class="line">    drawed:&#123;Clubs,6&#125;</span><br><span class="line">    drawed:&#123;Diamonds,2&#125;</span><br><span class="line">player 5 is drawing:</span><br><span class="line">    drawed:&#123;Hearts,4&#125;</span><br><span class="line">    drawed:&#123;Hearts,Queen&#125;</span><br><span class="line">    drawed:&#123;Hearts,10&#125;</span><br><span class="line">    drawed:&#123;Clubs,Jack&#125;</span><br><span class="line">    drawed:&#123;Diamonds,8&#125;</span><br></pre></td></tr></table></figure>
+<p>完美！</p>
+<h2 id="再见，Enkel"><a href="#再见，Enkel" class="headerlink" title="再见，Enkel"></a>再见，Enkel</h2><p>为了实现 Enkel 和分享整个过程我花费了大量的精力。写代码是一回事，能够表达和分享是另一回事（能够让读者通俗易懂本身就是一个很大的挑战）。</p>
+<p>在这个过程中我学习到了很多，也希望屏幕前面的你也能有所收获。</p>
+<p>很不幸的是，这是系列中的最后一篇了，这个项目将继续下去，所以，保持关注吧！</p>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#源码"><span class="toc-text">源码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扑克牌洗牌模拟器"><span class="toc-text">扑克牌洗牌模拟器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Card-类"><span class="toc-text">Card 类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CardDrawer-类"><span class="toc-text">CardDrawer 类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行"><span class="toc-text">运行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#再见，Enkel"><span class="toc-text">再见，Enkel</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/09/04/Creating-JVM-Language-Part-19/" rel="next" title="手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 19">
+          手把手教你实现一门运行在 JVM 上的语言 Enkel, 系列 19
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/09/11/Fix-TBS-magic-bug/" rel="prev" title="曲线救国之修复腾讯 X5 内核文件上传的兼容性问题">
+            曲线救国之修复腾讯 X5 内核文件上传的兼容性问题
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/09/04/Creating-JVM-Language-Part-20/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>

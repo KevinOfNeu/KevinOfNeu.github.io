@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#202020"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+  
+  
+    <meta name="keywords" content="LLVM,obfuscator,混淆," />
+  
+
+  
+    <meta name="description" content="KevinOfNeu&#39;s Blog | 叫兽的博客 | 思绪偶尔在这里停留 | 三关茅庐 | 博客 | 叫兽" />
+  
+  
+  <link rel="icon" type="image/x-icon" href="/logo.png">
+  <title>obfuscator (OLLVM） [ 叫兽的博客 ]</title>
+  
+    <!-- stylesheets list from config.yml -->
+    
+      <link rel="stylesheet" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    
+      <link rel="stylesheet" href="/css/xoxo.css">
+    
+  
+</head>
+
+
+<body>
+  <div class="nav-container">
+    <nav class="home-menu pure-menu pure-menu-horizontal">
+  <a class="pure-menu-heading" href="/">
+    <img class="avatar" src="https://blog.0xff000000.com/images/logo.png">
+    <span class="title">叫兽的博客</span>
+  </a>
+
+  <ul class="pure-menu-list clearfix">
+      
+          
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">首页</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/archives" class="pure-menu-link">归档</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/tags" class="pure-menu-link">标签</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/search" class="pure-menu-link">搜索</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="https://0xff000000.com" class="pure-menu-link">关于</a></li>
+          
+      
+          
+            <li class="pure-menu-item"><a href="/atom.xml" class="pure-menu-link">订阅</a></li>
+          
+      
+  </ul>
+   
+</nav>
+  </div>
+
+  <div class="container" id="content-outer">
+    <div class="inner" id="content-inner">
+      <div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        obfuscator (OLLVM）
+      </h1>
+      <span>
+        
+        <time class="time" datetime="2018-11-12T12:00:00.000Z">
+        2018-11-12
+      </time>
+        
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+      <span class="post-tags">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LLVM/">LLVM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/obfuscator/">obfuscator</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/混淆/">混淆</a></li></ul>
+      </span>
+    </span>
+      <span class="slash">/</span>
+      <span class="read">
+      <span id="busuanzi_value_page_pv"></span> 点击
+    </span>
+      <span class="slash">/</span>
+      <span class="read">阅读耗时 6 分钟</span>
+    </header>
+
+    <div class="post-content">
+      <p>OLLVM（Obfuscator-LLVM）是瑞士西北应用科技大学安全实验室于2010年6月份发起的一个项目，该项目旨在提供一套开源的针对LLVM的代码混淆工具，以增加对逆向工程的难度。后期转向商业项目strong.protect。目前，OLLVM已经支持LLVM-4.0版本。</p>
+<p>本文主要记录了 OLLVM 的编译，使用流程。</p>
+<a id="more"></a>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><a href="https://github.com/obfuscator-llvm/obfuscator" target="_blank" rel="noopener">obfuscator</a> 在 2010年由 HEIG-VD 发起，为 LLVM 提供了代码混淆编译组件。Obfuscator 作用在 LLVM 的 IR 层，因此，它和其他所有可经由 LLVM 编译的语言都兼容，比如 C，C++, OC, Ada 等，并且也支持所有的平台（x86, x86-64, PowerPC, PowerPC-64, ARM, Thumb, SPARC, Alpha, CellSPU, MIPS, MSP430, SystemZ, and XCore）。</p>
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p><a href="https://github.com/obfuscator-llvm/obfuscator" target="_blank" rel="noopener">obfuscator</a> 有多个分支，我们选 llvm-4.0, 它基于 LLVM 官方版本 4.0.1。</p>
+<p>编译 obfuscator 需要安装 CMake，克隆代码需要 git， 读者自行补齐。</p>
+<p>只需要执行如下系列命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git clone -b llvm-4.0 https://github.com/obfuscator-llvm/obfuscator.git</span><br><span class="line">$ cd obfuscator</span><br><span class="line">$ mkdir build</span><br><span class="line">$ cd build</span><br><span class="line">$ cmake -DCMAKE_BUILD_TYPE=Release ..</span><br><span class="line">$ make -j7</span><br></pre></td></tr></table></figure></p>
+<p>大概需要个个把小时，就会有结果。编译结果的二进制文件在 obfuscator/build/bin 目录下，比如 clang 命令。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>假设我们有源文件 cff.c, 路径位于相对于源码根目录 ./obfuscator 下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line">  int a = 0;</span><br><span class="line">  if(a == 0)</span><br><span class="line">    return 1;</span><br><span class="line">  else</span><br><span class="line">    return 10;</span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们先用系统自带的 clang 编译，产生结果文件（在 cff.c 源码路径）:<br><code>$ clang cff.c -o original</code></p>
+<p>然后我们使用自己编译的 clang +  ‘Control Flow Flattening’ 模式混淆。</p>
+<p>在编译结果 bin 路径执行如下命令：<br><code>./clang-4.0 ../../obfuscator/cff.c -o ../../obfuscator/obs -mllvm -fla</code></p>
+<p>然后我们用 Hopper 分别打开 original 和 obs 两个对象文件:</p>
+<p><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-11-12-124222.jpg" alt=""></p>
+<p>对比发现，经过 cfa 混淆后，原本程序的控制流被打破，增加了阅读门槛。</p>
+<h2 id="几种混淆模式"><a href="#几种混淆模式" class="headerlink" title="几种混淆模式"></a>几种混淆模式</h2><h3 id="指令替换模式（Instructions-Substitution）"><a href="#指令替换模式（Instructions-Substitution）" class="headerlink" title="指令替换模式（Instructions Substitution）"></a>指令替换模式（Instructions Substitution）</h3><p>本质上指令替换就是用等价的更加复杂的指令替换原本可读性更好的指令。比如，加减以及布尔指令。</p>
+<p>编译时，使用 -mllvm -sub 参数即可。</p>
+<h3 id="控制流平展模式（Control-Flow-Flattening）"><a href="#控制流平展模式（Control-Flow-Flattening）" class="headerlink" title="控制流平展模式（Control Flow Flattening）"></a>控制流平展模式（Control Flow Flattening）</h3><p>该模式改变原本程序的控制流。<br>例如在 _使用_ 示例，原本程序的控制流如下：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-11-12-124942.jpg" alt=""></p>
+<p>经过控制流平展后，控制流变成：<br><img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-11-12-125100.jpg" alt=""></p>
+<p>编译时使用 -mllvm -fla 参数。</p>
+<h3 id="控制流伪造模式-（Bogus-Control-Flow）"><a href="#控制流伪造模式-（Bogus-Control-Flow）" class="headerlink" title="控制流伪造模式 （Bogus Control Flow）"></a>控制流伪造模式 （Bogus Control Flow）</h3><p>也是对程序的控制流做操作，不同的是，BCF模式会在原代码块的前后随机插入新的代码块，新插入的代码块不是确定的，然后新代码块再通过条件判断跳转到原代码块中。更要命地是，原代码块可能会被克隆并插入随机的垃圾指令。</p>
+<p>编译时加 -mllvm -bcf 参数即可。</p>
+<h3 id="字符串混淆"><a href="#字符串混淆" class="headerlink" title="字符串混淆"></a>字符串混淆</h3><p>注意该模式 obfuscator 没有实现，这里只是提及一下，也是一种常见的混淆模式。混淆后的字符串没办法直接搜索到，变成一系列操作后的合成产物，提高了反编译成本。</p>
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><p>有的时候，由于效率或其他原因的考虑，我们只想给指定的函数混淆或不混淆该函数，OLLVM也提供了对这一特性的支持，你只需要给对应的函数添加attributes即可。比如，想对函数foo()使用fla混淆，只需要给函数foo()增加fla属性即可。</p>
+<p>例如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int foo() __attribute((__annotate__((&quot;fla&quot;))));</span><br><span class="line">int foo() &#123;</span><br><span class="line">   return 2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><p><a href="https://www.jianshu.com/p/a631b5584de6" target="_blank" rel="noopener">https://www.jianshu.com/p/a631b5584de6</a></p>
+</li>
+<li><p><a href="https://github.com/obfuscator-llvm/obfuscator/wiki/Functions-annotations" target="_blank" rel="noopener">https://github.com/obfuscator-llvm/obfuscator/wiki/Functions-annotations</a></p>
+</li>
+</ol>
+
+    </div>
+
+    <div>全文完。</div>
+  </article>
+  <div class="toc-container">
+    
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#介绍"><span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编译"><span class="toc-text">编译</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用"><span class="toc-text">使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#几种混淆模式"><span class="toc-text">几种混淆模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#指令替换模式（Instructions-Substitution）"><span class="toc-text">指令替换模式（Instructions Substitution）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#控制流平展模式（Control-Flow-Flattening）"><span class="toc-text">控制流平展模式（Control Flow Flattening）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#控制流伪造模式-（Bogus-Control-Flow）"><span class="toc-text">控制流伪造模式 （Bogus Control Flow）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串混淆"><span class="toc-text">字符串混淆</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注解"><span class="toc-text">注解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol>
+  </div>
+
+
+  </div>
+</div>
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+<div class="share" style="width: 100%;">
+  <img src="https://kevinofneu-blog-static.oss-cn-beijing.aliyuncs.com/static/2018-12-10-qrcode_for_gh_ffacf5722095_258.jpg" alt="Running Geek" style="margin: auto; display: block;"/>
+
+  <div style="margin: auto; text-align: center; font-size: 0.8em; color: grey;">老铁们关注走一走，不迷路</div>
+  
+</div>
+
+  
+    <div class="post-nav">
+      <div class="post-nav-item post-nav-next">
+        
+          <span>〈 </span>
+          <a href="/2018/09/11/Fix-TBS-magic-bug/" rel="next" title="曲线救国之修复腾讯 X5 内核文件上传的兼容性问题">
+          曲线救国之修复腾讯 X5 内核文件上传的兼容性问题
+          </a>
+        
+      </div>
+  
+      <div class="post-nav-item post-nav-prev">
+          
+          <a href="/2018/12/19/reading-plan-01-01/" rel="prev" title="100 天阅读计划，第一期">
+            100 天阅读计划，第一期
+          </a>
+          <span>〉</span>
+        
+      </div>
+    </div>
+  
+
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'blog-kevinofneu';
+    
+    var disqus_url = 'https://blog.0xff000000.com/2018/11/12/ollvm/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//blog-kevinofneu.disqus.com/count.js" async></script>
+
+
+
+    </div>
+
+    
+
+  </div>
+  <footer class="footer text-center">
+    <div id="bottom-inner">
+        <a class="bottom-item" href="https://blog.0xff000000.com">首页</a> |
+        <a class="bottom-item" href="https://0xff000000.com" target="_blank">主站</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu" target="_blank">GitHub</a> |
+        <a class="bottom-item" href="https://hexo.io" target="_blank">Powered by hexo</a> |
+        <a class="bottom-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">Theme xoxo</a>
+    </div>
+</footer>
+  
+
+<script>
+  (function(window, document, undefined) {
+
+    var timer = null;
+
+    function returnTop() {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(function fn() {
+        var oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        if (oTop > 0) {
+          document.body.scrollTop = document.documentElement.scrollTop = oTop - 50;
+          timer = requestAnimationFrame(fn);
+        } else {
+          cancelAnimationFrame(timer);
+        }
+      });
+    }
+
+    var hearts = [];
+    window.requestAnimationFrame = (function() {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          setTimeout(callback, 1000 / 60);
+        }
+    })();
+    init();
+
+    function init() {
+      css(".heart{z-index:9999;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);}.heart:after,.heart:before{content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: absolute;}.heart:after{top: -5px;}.heart:before{left: -5px;}");
+      attachEvent();
+      gameloop();
+      addMenuEvent();
+    }
+
+    function gameloop() {
+      for (var i = 0; i < hearts.length; i++) {
+        if (hearts[i].alpha <= 0) {
+          document.body.removeChild(hearts[i].el);
+          hearts.splice(i, 1);
+          continue;
+        }
+        hearts[i].y--;
+        hearts[i].scale += 0.004;
+        hearts[i].alpha -= 0.013;
+        hearts[i].el.style.cssText = "left:" + hearts[i].x + "px;top:" + hearts[i].y + "px;opacity:" + hearts[i].alpha + ";transform:scale(" + hearts[i].scale + "," + hearts[i].scale + ") rotate(45deg);background:" + hearts[i].color;
+      }
+      requestAnimationFrame(gameloop);
+    }
+
+    /**
+     * 给logo设置点击事件
+     * 
+     * - 回到顶部
+     * - 出现爱心
+     */
+    function attachEvent() {
+      var old = typeof window.onclick === "function" && window.onclick;
+      var logo = document.getElementById("logo");
+      if (logo) {
+        logo.onclick = function(event) {
+          returnTop();
+          old && old();
+          createHeart(event);
+        }
+      }
+      
+    }
+
+    function createHeart(event) {
+      var d = document.createElement("div");
+      d.className = "heart";
+      hearts.push({
+        el: d,
+        x: event.clientX - 5,
+        y: event.clientY - 5,
+        scale: 1,
+        alpha: 1,
+        color: randomColor()
+      });
+      document.body.appendChild(d);
+    }
+
+    function css(css) {
+      var style = document.createElement("style");
+      style.type = "text/css";
+      try {
+        style.appendChild(document.createTextNode(css));
+      } catch (ex) {
+        style.styleSheet.cssText = css;
+      }
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    function randomColor() {
+      // return "rgb(" + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + "," + (~~(Math.random() * 255)) + ")";
+      return "#F44336";
+    }
+
+    function addMenuEvent() {
+      var menu = document.getElementById('menu-main-post');
+      if (menu) {
+        var toc = document.getElementById('toc');
+        if (toc) {
+          menu.onclick = function() {
+            if (toc) {
+              if (toc.style.display == 'block') {
+                toc.style.display = 'none';
+              } else {
+                toc.style.display = 'block';
+              }
+            }
+          };
+        } else {
+          menu.style.display = 'none';
+        }
+      }
+    }
+
+  })(window, document);
+</script>
+
+  
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?FuckUBaidu";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-116671696-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+
+
+</body>
+</html>
